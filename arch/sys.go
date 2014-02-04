@@ -1,4 +1,4 @@
-package e8
+package arch
 
 type Sys interface {
 	Open(c Chan, v uint32)

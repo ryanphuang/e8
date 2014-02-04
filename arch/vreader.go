@@ -1,4 +1,4 @@
-package e8
+package arch
 
 type Vreader struct {
 	writers map[int]*Vwriter
