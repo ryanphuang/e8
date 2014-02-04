@@ -1,10 +1,13 @@
 .PHONY: all fmt tags
 
 all:
-	go build
+	go install ./...
 
 fmt:
-	go fmt
+	gofmt -s -w -l .
 
 tags:
 	gotags `find . -name "*.go"` > tags
+
+test:
+	go test ./...
