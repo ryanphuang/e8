@@ -37,6 +37,8 @@ func (self *Registers) WriteFreg(a uint8, v float64) {
 	self.fregs[a] = v
 }
 
-func (self *Registers) IncPC() {
+func (self *Registers) IncPC() uint32 {
+	ret := self.regs[RegPC]
 	self.regs[RegPC] += 4
+	return ret
 }
