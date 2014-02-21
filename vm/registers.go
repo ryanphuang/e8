@@ -1,13 +1,12 @@
 package vm
 
 type Registers struct {
-	pc    uint32
 	regs  []uint32
 	fregs []float64
 }
 
 const (
-	Nreg  = 8
+	Nreg  = 32
 	Nfreg = Nreg
 )
 
@@ -26,11 +25,13 @@ func (self *Registers) ReadFreg(a uint8) float64 { return self.fregs[a] }
 func (self *Registers) WriteReg(a uint8, v uint32) {
 	self.regs[a] = v
 	self.regs[0] = 0
+	self.regs[Nreg-1] = alignU32(self.regs[Nreg-1]) // pc
 }
 
 func (self *Registers) WriteFreg(a uint8, v float64) {
 	self.fregs[a] = v
 }
 
-func (self *Registers) PC() uint32 { return self.pc }
-func (self *Registers) SetPC(pc uint32) { self.pc = alignU32(pc) }
+func (self *Registers) IncPC() {
+	self.regs[Nreg-1] += 4
+}

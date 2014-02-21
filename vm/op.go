@@ -1,3 +1,9 @@
 package vm
 
-type Op func(inst uint32, reg *Registers, mem *Memory, state *State)
+type Op func(c *Core, inst uint32)
+
+var rops = map[uint32]Op{
+	0: func(c *Core, inst uint32) {
+
+	},
+}

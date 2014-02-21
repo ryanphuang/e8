@@ -6,8 +6,8 @@ type Align struct {
 
 const (
 	pageOffset = 12
-	PageSize = 1 << pageOffset
-	pageMask = PageSize - 1
+	PageSize   = 1 << pageOffset
+	pageMask   = PageSize - 1
 )
 
 func maskOffset(offset uint32) uint32 { return offset & pageMask }
