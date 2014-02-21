@@ -8,6 +8,7 @@ type Registers struct {
 const (
 	Nreg  = 32
 	Nfreg = Nreg
+	RegPC = Nreg - 1
 )
 
 func NewRegisters() *Registers {
@@ -24,8 +25,12 @@ func (self *Registers) ReadFreg(a uint8) float64 { return self.fregs[a] }
 
 func (self *Registers) WriteReg(a uint8, v uint32) {
 	self.regs[a] = v
-	self.regs[0] = 0
-	self.regs[Nreg-1] = alignU32(self.regs[Nreg-1]) // pc
+
+	if a == 0 {
+		self.regs[0] = 0
+	} else if a == RegPC {
+		self.regs[RegPC] = alignU32(self.regs[Nreg-1])
+	}
 }
 
 func (self *Registers) WriteFreg(a uint8, v float64) {
@@ -33,5 +38,5 @@ func (self *Registers) WriteFreg(a uint8, v float64) {
 }
 
 func (self *Registers) IncPC() {
-	self.regs[Nreg-1] += 4
+	self.regs[RegPC] += 4
 }
