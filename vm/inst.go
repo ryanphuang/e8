@@ -29,27 +29,49 @@ func makeInstList(m map[uint8]Inst, n uint8) []Inst {
 	return ret
 }
 
+const (
+	OpRinst = 0
+	OpJ     = 0x02
+	OpBeq   = 0x04
+	OpBne   = 0x05
+
+	OpAddi = 0x08
+	OpSlti = 0x0A
+	OpAndi = 0x0C
+	OpOri  = 0x0D
+	OpLui  = 0x0F
+
+	OpLw  = 0x23
+	OpLhs = 0x21
+	OpLhu = 0x25
+	OpLbs = 0x20
+	OpLbu = 0x24
+	OpSw  = 0x2B
+	OpSh  = 0x29
+	OpSb  = 0x28
+)
+
 var instList = makeInstList(
 	map[uint8]Inst{
-		0x00: opRinst,
-		0x02: opJ,
-		0x04: opBeq,
-		0x05: opBne,
+		OpRinst: opRinst,
+		OpJ:     opJ,
+		OpBeq:   opBeq,
+		OpBne:   opBne,
 
-		0x08: opAddi,
-		0x0A: opSlti,
-		0x0C: opAndi,
-		0x0D: opOri,
-		0x0F: opLui,
+		OpAddi: opAddi,
+		OpSlti: opSlti,
+		OpAndi: opAndi,
+		OpOri:  opOri,
+		OpLui:  opLui,
 
-		0x23: opLw,
-		0x21: opLhs,
-		0x25: opLhu,
-		0x20: opLbs,
-		0x24: opLbu,
-		0x2B: opSw,
-		0x29: opSh,
-		0x28: opSb,
+		OpLw:  opLw,
+		OpLhs: opLhs,
+		OpLhu: opLhu,
+		OpLbs: opLbs,
+		OpLbu: opLbu,
+		OpSw:  opSw,
+		OpSh:  opSh,
+		OpSb:  opSb,
 	}, Nop,
 )
 

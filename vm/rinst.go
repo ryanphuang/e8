@@ -1,28 +1,52 @@
 package vm
 
+const (
+	FnAdd = 0x20
+	FnSub = 0x22
+	FnAnd = 0x24
+	FnOr  = 0x25
+	FnXor = 0x26
+	FnNor = 0x27
+	FnSlt = 0x2A
+
+	FnMul  = 0x18
+	FnMulu = 0x19
+	FnDiv  = 0x1A
+	FnDivu = 0x1B
+	FnMod  = 0x1C
+	FnModu = 0x1D
+
+	FnSll  = 0x00
+	FnSrl  = 0x02
+	FnSra  = 0x03
+	FnSllv = 0x04
+	FnSrlv = 0x06
+	FnSrav = 0x07
+)
+
 var rInstList = makeInstList(
 	map[uint8]Inst{
-		0x20: opAdd,
-		0x22: opSub,
-		0x24: opAnd,
-		0x25: opOr,
-		0x26: opXor,
-		0x27: opNor,
-		0x2A: opSlt,
+		FnAdd: opAdd,
+		FnSub: opSub,
+		FnAnd: opAnd,
+		FnOr:  opOr,
+		FnXor: opXor,
+		FnNor: opNor,
+		FnSlt: opSlt,
 
-		0x18: opMul,
-		0x19: opMulu,
-		0x1A: opDiv,
-		0x1B: opDivu,
-		0x1C: opMod,
-		0x1D: opModu,
+		FnMul:  opMul,
+		FnMulu: opMulu,
+		FnDiv:  opDiv,
+		FnDivu: opDivu,
+		FnMod:  opMod,
+		FnModu: opModu,
 
-		0x00: opSll,
-		0x02: opSrl,
-		0x03: opSra,
-		0x04: opSllv,
-		0x06: opSrlv,
-		0x07: opSrav,
+		FnSll:  opSll,
+		FnSrl:  opSrl,
+		FnSra:  opSra,
+		FnSllv: opSllv,
+		FnSrlv: opSrlv,
+		FnSrav: opSrav,
 	}, Nfunct,
 )
 

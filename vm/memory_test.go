@@ -38,7 +38,7 @@ func TestMemory(t *testing.T) {
 	m := NewMemory()
 	p := NewDataPage()
 	m.Map(4096, p)
-	m.WriteU32(4096 + 1024 + 3, 0x01020304)
+	m.WriteU32(4096+1024+3, 0x01020304)
 	i := m.ReadU16(4096 + 1024 + 3)
 	if i != 0x0102 {
 		t.Fail()
