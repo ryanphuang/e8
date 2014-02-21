@@ -1,4 +1,4 @@
-.PHONY: all fmt tags
+.PHONY: all fmt tags doc
 
 all:
 	go install ./...
@@ -17,3 +17,6 @@ testv:
 
 lc:
 	wc -l `find . -name "*.go"`
+
+doc:
+	godoc -http=:8000
