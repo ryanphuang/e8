@@ -1,5 +1,9 @@
 package inst
 
+import (
+	"fmt"
+)
+
 type Inst uint32
 
 func (i Inst) U32() uint32 { return uint32(i) }
@@ -136,3 +140,41 @@ func opJ(c Core, f *fields) {
 }
 
 func opNoop(c Core, f *fields) {}
+
+func (i Inst) String() string {
+	op := uint8(i >> 26)
+
+	if op == 0 {
+		rs := uint8(i>>21) & 0x1f
+		rt := uint8(i>>16) & 0x1f
+		rd := uint8(i>>11) & 0x1f
+		// shamt := uint8(i>>6) & 0x1f
+		funct := uint8(i) & 0x3f
+		r3 := func(op string) string {
+			return fmt.Sprintf("%s $%d, $%d, $%d", op, rd, rs, rt)
+		}
+
+		switch funct {
+		case FnAdd:
+			return r3("add")
+		case FnSub:
+			return r3("sub")
+		case FnAnd:
+			return r3("and")
+		case FnOr:
+			return r3("or")
+		case FnXor:
+			return r3("xor")
+		case FnNor:
+			return r3("nor")
+		case FnSlt:
+			return r3("slt")
+		case FnMul:
+			return r3("mul")
+		case FnMulu:
+			return r3("mulu")
+		}
+	}
+
+	return "noop"
+}
