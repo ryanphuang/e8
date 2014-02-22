@@ -25,7 +25,7 @@ const (
 )
 
 var rInstList = makeInstList(
-	map[uint8]Inst{
+	map[uint8]instFunc{
 		FnAdd: opAdd,
 		FnSub: opSub,
 		FnAnd: opAnd,
@@ -50,33 +50,33 @@ var rInstList = makeInstList(
 	}, Nfunct,
 )
 
-func opNoopr(c *Core, f *Fields) {}
+func opNoopr(c *Core, f *fields) {}
 
-func opAdd(c *Core, f *Fields) {
+func opAdd(c *Core, f *fields) {
 	s := c.ReadReg(f.rs)
 	t := c.ReadReg(f.rt)
 	c.WriteReg(f.rd, s+t)
 }
 
-func opSub(c *Core, f *Fields) {
+func opSub(c *Core, f *fields) {
 	s := c.ReadReg(f.rs)
 	t := c.ReadReg(f.rt)
 	c.WriteReg(f.rd, s-t)
 }
 
-func opMul(c *Core, f *Fields) {
+func opMul(c *Core, f *fields) {
 	s := int32(c.ReadReg(f.rs))
 	t := int32(c.ReadReg(f.rt))
 	c.WriteReg(f.rd, uint32(s*t))
 }
 
-func opMulu(c *Core, f *Fields) {
+func opMulu(c *Core, f *fields) {
 	s := c.ReadReg(f.rs)
 	t := c.ReadReg(f.rt)
 	c.WriteReg(f.rd, s*t)
 }
 
-func opDiv(c *Core, f *Fields) {
+func opDiv(c *Core, f *fields) {
 	s := int32(c.ReadReg(f.rs))
 	t := int32(c.ReadReg(f.rt))
 	if t == 0 {
@@ -86,7 +86,7 @@ func opDiv(c *Core, f *Fields) {
 	}
 }
 
-func opMod(c *Core, f *Fields) {
+func opMod(c *Core, f *fields) {
 	s := int32(c.ReadReg(f.rs))
 	t := int32(c.ReadReg(f.rt))
 	if t == 0 {
@@ -96,7 +96,7 @@ func opMod(c *Core, f *Fields) {
 	}
 }
 
-func opDivu(c *Core, f *Fields) {
+func opDivu(c *Core, f *fields) {
 	s := c.ReadReg(f.rs)
 	t := c.ReadReg(f.rt)
 	if t == 0 {
@@ -106,7 +106,7 @@ func opDivu(c *Core, f *Fields) {
 	}
 }
 
-func opModu(c *Core, f *Fields) {
+func opModu(c *Core, f *fields) {
 	s := c.ReadReg(f.rs)
 	t := c.ReadReg(f.rt)
 	if t == 0 {
@@ -116,31 +116,31 @@ func opModu(c *Core, f *Fields) {
 	}
 }
 
-func opAnd(c *Core, f *Fields) {
+func opAnd(c *Core, f *fields) {
 	s := c.ReadReg(f.rs)
 	t := c.ReadReg(f.rt)
 	c.WriteReg(f.rd, s&t)
 }
 
-func opOr(c *Core, f *Fields) {
+func opOr(c *Core, f *fields) {
 	s := c.ReadReg(f.rs)
 	t := c.ReadReg(f.rt)
 	c.WriteReg(f.rd, s|t)
 }
 
-func opXor(c *Core, f *Fields) {
+func opXor(c *Core, f *fields) {
 	s := c.ReadReg(f.rs)
 	t := c.ReadReg(f.rt)
 	c.WriteReg(f.rd, s^t)
 }
 
-func opNor(c *Core, f *Fields) {
+func opNor(c *Core, f *fields) {
 	s := c.ReadReg(f.rs)
 	t := c.ReadReg(f.rt)
 	c.WriteReg(f.rd, ^(s | t))
 }
 
-func opSlt(c *Core, f *Fields) {
+func opSlt(c *Core, f *fields) {
 	s := int32(c.ReadReg(f.rs))
 	t := int32(c.ReadReg(f.rt))
 	if s < t {
@@ -150,34 +150,34 @@ func opSlt(c *Core, f *Fields) {
 	}
 }
 
-func opSll(c *Core, f *Fields) {
+func opSll(c *Core, f *fields) {
 	t := c.ReadReg(f.rt)
 	c.WriteReg(f.rd, t<<f.shamt)
 }
 
-func opSrl(c *Core, f *Fields) {
+func opSrl(c *Core, f *fields) {
 	t := c.ReadReg(f.rt)
 	c.WriteReg(f.rd, t>>f.shamt)
 }
 
-func opSra(c *Core, f *Fields) {
+func opSra(c *Core, f *fields) {
 	t := int32(c.ReadReg(f.rt))
 	c.WriteReg(f.rd, uint32(t>>f.shamt))
 }
 
-func opSllv(c *Core, f *Fields) {
+func opSllv(c *Core, f *fields) {
 	s := c.ReadReg(f.rs)
 	t := c.ReadReg(f.rt)
 	c.WriteReg(f.rd, t<<s)
 }
 
-func opSrlv(c *Core, f *Fields) {
+func opSrlv(c *Core, f *fields) {
 	s := c.ReadReg(f.rs)
 	t := c.ReadReg(f.rt)
 	c.WriteReg(f.rd, t>>s)
 }
 
-func opSrav(c *Core, f *Fields) {
+func opSrav(c *Core, f *fields) {
 	s := c.ReadReg(f.rs)
 	t := int32(c.ReadReg(f.rt))
 	c.WriteReg(f.rd, uint32(t>>s))

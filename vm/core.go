@@ -13,7 +13,7 @@ type Core struct {
 	Stdout io.Writer
 	Log    io.Writer
 
-	fields *Fields
+	alu *ALU
 }
 
 func NewCore() *Core {
@@ -22,7 +22,7 @@ func NewCore() *Core {
 	ret.Memory = NewMemory()
 	ret.Stdout = os.Stdout
 
-	ret.fields = new(Fields)
+	ret.alu = NewALU()
 
 	return ret
 }
@@ -41,12 +41,11 @@ func (self *Core) Step() {
 
 	pc := self.IncPC()
 	inst := self.Memory.ReadU32(pc)
-	self.fields.inst = inst
 	if self.Log != nil {
 		fmt.Fprintf(self.Log, "%08x: %08x\n", pc, inst)
 		self.Registers.PrintTo(self.Log)
 	}
-	opInst(self, self.fields)
+	self.alu.Inst(self, inst)
 
 	self.SysPage.FlushStdout(self.Stdout)
 }

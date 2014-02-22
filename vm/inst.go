@@ -1,8 +1,8 @@
 package vm
 
-type Inst func(c *Core, fields *Fields)
+type instFunc func(c *Core, fields *fields)
 
-type Fields struct {
+type fields struct {
 	inst  uint32
 	rs    uint8
 	rt    uint8
@@ -16,10 +16,10 @@ const (
 	Nop    = 64
 )
 
-func opNoop(c *Core, f *Fields) {}
+func opNoop(c *Core, f *fields) {}
 
-func makeInstList(m map[uint8]Inst, n uint8) []Inst {
-	ret := make([]Inst, n)
+func makeInstList(m map[uint8]instFunc, n uint8) []instFunc {
+	ret := make([]instFunc, n)
 	for i := range ret {
 		ret[i] = opNoopr
 	}
@@ -52,7 +52,7 @@ const (
 )
 
 var instList = makeInstList(
-	map[uint8]Inst{
+	map[uint8]instFunc{
 		OpRinst: opRinst,
 		OpJ:     opJ,
 		OpBeq:   opBeq,
@@ -75,7 +75,7 @@ var instList = makeInstList(
 	}, Nop,
 )
 
-func opInst(c *Core, f *Fields) {
+func opInst(c *Core, f *fields) {
 	op := uint8(f.inst >> 26)
 	f.rs = uint8(f.inst>>21) & 0x1f
 	f.rt = uint8(f.inst>>16) & 0x1f
@@ -84,7 +84,7 @@ func opInst(c *Core, f *Fields) {
 	instList[op](c, f)
 }
 
-func opRinst(c *Core, f *Fields) {
+func opRinst(c *Core, f *fields) {
 	f.rd = uint8(f.inst>>11) & 0x1f
 	f.shamt = uint8(f.inst>>6) & 0x1f
 	funct := uint8(f.inst) & 0x3f
@@ -92,7 +92,7 @@ func opRinst(c *Core, f *Fields) {
 	rInstList[funct](c, f)
 }
 
-func opJ(c *Core, f *Fields) {
+func opJ(c *Core, f *fields) {
 	pc := c.ReadReg(RegPC)
 	c.WriteReg(RegPC, pc+uint32(int32(f.inst<<6)>>4))
 }
