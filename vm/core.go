@@ -1,6 +1,7 @@
 package vm
 
 import (
+	"io"
 	"os"
 )
 
@@ -8,6 +9,7 @@ type Core struct {
 	*Registers
 	*Memory
 	*SysPage
+	Stdout io.Writer
 
 	fields *Fields
 }
@@ -16,6 +18,8 @@ func NewCore() *Core {
 	ret := new(Core)
 	ret.Registers = NewRegisters()
 	ret.Memory = NewMemory()
+	ret.Stdout = os.Stdout
+
 	ret.fields = new(Fields)
 
 	return ret
@@ -37,7 +41,7 @@ func (self *Core) Step() {
 	self.fields.inst = self.Memory.ReadU32(pc)
 	opInst(self, self.fields)
 
-	self.SysPage.FlushStdout(os.Stdout)
+	self.SysPage.FlushStdout(self.Stdout)
 }
 
 func (self *Core) Run(n uint32) uint32 {
