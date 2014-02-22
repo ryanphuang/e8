@@ -3,6 +3,10 @@ package vm
 import (
 	"bytes"
 	"testing"
+
+	"github.com/h8liu/e8/vm/inst"
+	"github.com/h8liu/e8/vm/mem"
+
 	// "os"
 )
 
@@ -13,14 +17,14 @@ func TestHelloWorld(t *testing.T) {
 	str := "Hello, world.\n"
 	c.Stdout = out
 
-	dpage := NewDataPage()
-	copy(dpage.bytes, []byte(str+"\000"))
+	dpage := mem.NewPage()
+	copy(dpage.Bytes(), []byte(str+"\000"))
 
-	ipage := NewDataPage()
-	c.Map(PageStart(1), ipage)
-	c.Map(PageStart(2), dpage)
+	ipage := mem.NewPage()
+	c.Map(mem.PageStart(1), ipage)
+	c.Map(mem.PageStart(2), dpage)
 
-	a := &Align{ipage}
+	a := &mem.Align{ipage}
 
 	offset := uint32(0)
 	w := func(i uint32) uint32 {
@@ -45,17 +49,21 @@ func TestHelloWorld(t *testing.T) {
 			sb $0, [0x4]
 	*/
 
-	w(Rinst(1, 0, 0, FnAdd))       // 000
-	w(Iinst(OpLbu, 1, 2, 0x2000))  // 004
-	w(Iinst(OpBeq, 2, 0, 0x0005))  // 008
-	w(Iinst(OpLbu, 0, 3, 0x0005))  // 00c
-	w(Iinst(OpBne, 3, 0, 0xfffe))  // 010
-	w(Iinst(OpSb, 0, 2, 0x0005))   // 014
-	w(Iinst(OpAddi, 1, 1, 0x0001)) // 018
-	w(Jinst(-7))                   // 01c
-	w(Iinst(OpSb, 0, 0, 0x0004))   // 020
+	Rinst := inst.Rinst
+	Iinst := inst.Iinst
+	Jinst := inst.Jinst
 
-	c.SetPC(PageStart(1))
+	w(Rinst(1, 0, 0, inst.FnAdd))       // 000
+	w(Iinst(inst.OpLbu, 1, 2, 0x2000))  // 004
+	w(Iinst(inst.OpBeq, 2, 0, 0x0005))  // 008
+	w(Iinst(inst.OpLbu, 0, 3, 0x0005))  // 00c
+	w(Iinst(inst.OpBne, 3, 0, 0xfffe))  // 010
+	w(Iinst(inst.OpSb, 0, 2, 0x0005))   // 014
+	w(Iinst(inst.OpAddi, 1, 1, 0x0001)) // 018
+	w(Jinst(-7))                        // 01c
+	w(Iinst(inst.OpSb, 0, 0, 0x0004))   // 020
+
+	c.SetPC(mem.PageStart(1))
 	left := c.Run(1000)
 
 	if left < 850 {

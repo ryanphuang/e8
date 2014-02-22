@@ -1,12 +1,16 @@
-package vm
+package inst_test
 
 import (
 	"testing"
+
+	"github.com/h8liu/e8/vm"
+	. "github.com/h8liu/e8/vm/inst"
+	"github.com/h8liu/e8/vm/mem"
 )
 
 func TestSingleInst(t *testing.T) {
-	c := NewCore()
-	p := NewDataPage()
+	c := vm.NewCore()
+	p := mem.NewPage()
 	c.Map(0, p)
 
 	s := func(i uint32) {

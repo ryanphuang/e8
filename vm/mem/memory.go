@@ -1,4 +1,4 @@
-package vm
+package mem
 
 type Memory struct {
 	pages map[uint32]Page

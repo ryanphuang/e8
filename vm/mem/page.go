@@ -1,4 +1,4 @@
-package vm
+package mem
 
 type Page interface {
 	Write(offset uint32, b uint8)

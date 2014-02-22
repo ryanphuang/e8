@@ -1,11 +1,11 @@
-package vm
+package mem
 
 import (
 	"testing"
 )
 
 func TestDataPage(t *testing.T) {
-	p := NewDataPage()
+	p := NewPage()
 
 	for i := uint32(0); i < PageSize; i++ {
 		p.Write(i, uint8(i))
@@ -20,7 +20,7 @@ func TestDataPage(t *testing.T) {
 }
 
 func TestAlign(t *testing.T) {
-	p := NewDataPage()
+	p := NewPage()
 	a := &Align{p}
 	a.WriteU32(1024+3, 0x01020304)
 	i := a.ReadU16(1024 + 1)
@@ -36,7 +36,7 @@ func TestAlign(t *testing.T) {
 
 func TestMemory(t *testing.T) {
 	m := NewMemory()
-	p := NewDataPage()
+	p := NewPage()
 	m.Map(4096, p)
 	m.WriteU32(4096+1024+3, 0x01020304)
 	i := m.ReadU16(4096 + 1024 + 3)

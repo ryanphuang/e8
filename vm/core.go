@@ -4,25 +4,28 @@ import (
 	"fmt"
 	"io"
 	"os"
+
+	"github.com/h8liu/e8/vm/inst"
+	"github.com/h8liu/e8/vm/mem"
 )
 
 type Core struct {
 	*Registers
-	*Memory
+	*mem.Memory
 	*SysPage
 	Stdout io.Writer
 	Log    io.Writer
 
-	alu *ALU
+	alu *inst.ALU
 }
 
 func NewCore() *Core {
 	ret := new(Core)
 	ret.Registers = NewRegisters()
-	ret.Memory = NewMemory()
+	ret.Memory = mem.NewMemory()
 	ret.Stdout = os.Stdout
 
-	ret.alu = NewALU()
+	ret.alu = inst.NewALU()
 
 	return ret
 }
@@ -64,5 +67,5 @@ func (self *Core) Run(n uint32) uint32 {
 }
 
 func (self *Core) SetPC(pc uint32) {
-	self.Registers.WriteReg(RegPC, pc)
+	self.Registers.WriteReg(inst.RegPC, pc)
 }

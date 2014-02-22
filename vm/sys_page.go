@@ -2,6 +2,8 @@ package vm
 
 import (
 	"io"
+
+	"github.com/h8liu/e8/vm/mem"
 )
 
 type SysPage struct {
@@ -13,7 +15,7 @@ type SysPage struct {
 	stdout chan byte
 }
 
-var _ Page = new(SysPage)
+var _ mem.Page = new(SysPage)
 
 func NewSysPage() *SysPage {
 	ret := new(SysPage)

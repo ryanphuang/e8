@@ -1,4 +1,4 @@
-package vm
+package mem
 
 type NoopPage struct{}
 

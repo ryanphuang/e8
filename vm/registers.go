@@ -3,6 +3,9 @@ package vm
 import (
 	"fmt"
 	"io"
+
+	"github.com/h8liu/e8/vm/align"
+	"github.com/h8liu/e8/vm/inst"
 )
 
 type Registers struct {
@@ -10,17 +13,11 @@ type Registers struct {
 	fregs []float64
 }
 
-const (
-	Nreg  = 32
-	Nfreg = Nreg
-	RegPC = Nreg - 1
-)
-
 func NewRegisters() *Registers {
 	ret := new(Registers)
 
-	ret.regs = make([]uint32, Nreg)
-	ret.fregs = make([]float64, Nfreg)
+	ret.regs = make([]uint32, inst.Nreg)
+	ret.fregs = make([]float64, inst.Nfreg)
 
 	return ret
 }
@@ -33,8 +30,8 @@ func (self *Registers) WriteReg(a uint8, v uint32) {
 
 	if a == 0 {
 		self.regs[0] = 0
-	} else if a == RegPC {
-		self.regs[RegPC] = alignU32(self.regs[Nreg-1])
+	} else if a == inst.RegPC {
+		self.regs[inst.RegPC] = align.U32(self.regs[inst.RegPC])
 	}
 }
 
@@ -43,13 +40,13 @@ func (self *Registers) WriteFreg(a uint8, v float64) {
 }
 
 func (self *Registers) IncPC() uint32 {
-	ret := self.regs[RegPC]
-	self.regs[RegPC] += 4
+	ret := self.regs[inst.RegPC]
+	self.regs[inst.RegPC] += 4
 	return ret
 }
 
 func (self *Registers) PrintTo(w io.Writer) {
-	for i := uint8(0); i < Nreg; i++ {
+	for i := uint8(0); i < inst.Nreg; i++ {
 		fmt.Fprintf(w, "$%02d:%08x", i, self.ReadReg(i))
 		if (i+1)%4 == 0 {
 			fmt.Fprintln(w)

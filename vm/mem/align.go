@@ -1,23 +1,25 @@
-package vm
+package mem
+
+import (
+	"github.com/h8liu/e8/vm/align"
+)
 
 type Align struct {
 	Page
 }
 
 func maskOffset(offset uint32) uint32 { return offset & pageMask }
-func alignU16(offset uint32) uint32   { return offset >> 1 << 1 }
-func alignU32(offset uint32) uint32   { return offset >> 2 << 2 }
 
 func offset8(offset uint32) uint32 {
 	return maskOffset(offset)
 }
 
 func offset16(offset uint32) uint32 {
-	return alignU16(maskOffset(offset))
+	return align.U16(maskOffset(offset))
 }
 
 func offset32(offset uint32) uint32 {
-	return alignU32(maskOffset(offset))
+	return align.U32(maskOffset(offset))
 }
 
 func (self *Align) WriteU8(offset uint32, value uint8) {

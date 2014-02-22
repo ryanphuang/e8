@@ -1,4 +1,4 @@
-package vm
+package inst
 
 func Rinst(s, t, d, funct uint8) uint32 {
 	ret := uint32(s) << 21
