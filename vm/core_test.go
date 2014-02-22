@@ -53,7 +53,7 @@ func TestHelloWorld(t *testing.T) {
 	Iinst := inst.Iinst
 	Jinst := inst.Jinst
 
-	w(Rinst(1, 0, 0, inst.FnAdd))       // 000
+	w(Rinst(0, 0, 1, inst.FnAdd))       // 000
 	w(Iinst(inst.OpLbu, 1, 2, 0x2000))  // 004
 	w(Iinst(inst.OpBeq, 2, 0, 0x0005))  // 008
 	w(Iinst(inst.OpLbu, 0, 3, 0x0005))  // 00c

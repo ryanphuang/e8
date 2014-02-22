@@ -210,7 +210,8 @@ func (i Inst) String() string {
 			return fmt.Sprintf("noop-r%d", funct)
 		}
 	} else if op == OpJ {
-		panic("todo")
+		im := int32(i<<6) >> 6
+		return fmt.Sprintf("j %d", im)
 	} else {
 		rs := uint8(i>>21) & 0x1f
 		rt := uint8(i>>16) & 0x1f
@@ -229,6 +230,10 @@ func (i Inst) String() string {
 			return fmt.Sprintf("%s $%d, $%d, %d", op, rt, rs, ims)
 		}
 
+		i3a := func(op string) string {
+			return fmt.Sprintf("%s $%d, %d($%d)", op, rt, ims, rs)
+		}
+
 		switch op {
 		case OpBeq:
 			return i3sr("beq")
@@ -244,6 +249,22 @@ func (i Inst) String() string {
 			return i3s("ori")
 		case OpLui:
 			return i2("lui")
+		case OpLw:
+			return i3a("lw")
+		case OpLhs:
+			return i3a("lhs")
+		case OpLhu:
+			return i3a("lhu")
+		case OpLbs:
+			return i3a("lbs")
+		case OpLbu:
+			return i3a("lbu")
+		case OpSw:
+			return i3a("sw")
+		case OpSh:
+			return i3a("sh")
+		case OpSb:
+			return i3a("sb")
 		}
 	}
 
