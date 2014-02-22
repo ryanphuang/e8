@@ -1,0 +1,5 @@
+- Build a MISP-like very simple virtual machine
+- Build an assembler
+- Build a compiler for a Go-like language
+- Reimplement all the above in Javascript
+- Build an online platform where people can submit 
