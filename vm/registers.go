@@ -1,5 +1,10 @@
 package vm
 
+import (
+	"fmt"
+	"io"
+)
+
 type Registers struct {
 	regs  []uint32
 	fregs []float64
@@ -41,4 +46,15 @@ func (self *Registers) IncPC() uint32 {
 	ret := self.regs[RegPC]
 	self.regs[RegPC] += 4
 	return ret
+}
+
+func (self *Registers) PrintTo(w io.Writer) {
+	for i := uint8(0); i < Nreg; i++ {
+		fmt.Fprintf(w, "$%02d:%08x", i, self.ReadReg(i))
+		if (i+1)%4 == 0 {
+			fmt.Fprintln(w)
+		} else {
+			fmt.Fprint(w, " ")
+		}
+	}
 }

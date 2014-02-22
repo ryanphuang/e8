@@ -95,6 +95,7 @@ func (self *SysPage) FlushStdout(w io.Writer) {
 	}
 
 	for len(self.stdout) > 0 {
-		w.Write([]byte{<-self.stdout})
+		b := <-self.stdout
+		w.Write([]byte{b})
 	}
 }

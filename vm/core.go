@@ -1,6 +1,7 @@
 package vm
 
 import (
+	"fmt"
 	"io"
 	"os"
 )
@@ -10,6 +11,7 @@ type Core struct {
 	*Memory
 	*SysPage
 	Stdout io.Writer
+	Log    io.Writer
 
 	fields *Fields
 }
@@ -25,7 +27,7 @@ func NewCore() *Core {
 	return ret
 }
 
-func NewVm() *Core {
+func NewVM() *Core {
 	ret := NewCore()
 
 	ret.SysPage = NewSysPage()
@@ -38,7 +40,12 @@ func (self *Core) Step() {
 	self.SysPage.ClearError()
 
 	pc := self.IncPC()
-	self.fields.inst = self.Memory.ReadU32(pc)
+	inst := self.Memory.ReadU32(pc)
+	self.fields.inst = inst
+	if self.Log != nil {
+		fmt.Fprintf(self.Log, "%08x: %08x\n", pc, inst)
+		self.Registers.PrintTo(self.Log)
+	}
 	opInst(self, self.fields)
 
 	self.SysPage.FlushStdout(self.Stdout)

@@ -4,12 +4,6 @@ type Align struct {
 	Page
 }
 
-const (
-	pageOffset = 12
-	PageSize   = 1 << pageOffset
-	pageMask   = PageSize - 1
-)
-
 func maskOffset(offset uint32) uint32 { return offset & pageMask }
 func alignU16(offset uint32) uint32   { return offset >> 1 << 1 }
 func alignU32(offset uint32) uint32   { return offset >> 2 << 2 }
