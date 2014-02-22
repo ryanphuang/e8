@@ -1,9 +1,13 @@
 package vm
 
+import (
+	"os"
+)
+
 type Core struct {
 	*Registers
 	*Memory
-	*State
+	*SysPage
 
 	fields *Fields
 }
@@ -20,15 +24,20 @@ func NewCore() *Core {
 func NewVm() *Core {
 	ret := NewCore()
 
-	// TODO: map vm system pages
+	ret.SysPage = NewSysPage()
+	ret.Memory.Map(0, ret.SysPage)
 
 	return ret
 }
 
 func (self *Core) Step() {
+	self.SysPage.ClearError()
+
 	pc := self.IncPC()
 	self.fields.inst = self.Memory.ReadU32(pc)
 	opInst(self, self.fields)
+
+	self.SysPage.FlushStdout(os.Stdout)
 }
 
 func (self *Core) Run(n uint32) uint32 {
@@ -36,7 +45,9 @@ func (self *Core) Run(n uint32) uint32 {
 		self.Step()
 		n--
 
-		// TODO: check pausing condition
+		if self.SysPage.Halted() {
+			break
+		}
 	}
 
 	return n
