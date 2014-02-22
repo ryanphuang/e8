@@ -11,7 +11,7 @@ import (
 )
 
 func TestHelloWorld(t *testing.T) {
-	c := NewVM()
+	c := New()
 	// c.Log = os.Stdout
 	out := new(bytes.Buffer)
 	str := "Hello, world.\n"
@@ -27,9 +27,9 @@ func TestHelloWorld(t *testing.T) {
 	a := &mem.Align{ipage}
 
 	offset := uint32(0)
-	w := func(i uint32) uint32 {
+	w := func(i inst.Inst) uint32 {
 		ret := offset
-		a.WriteU32(offset, i)
+		a.WriteU32(offset, i.U32())
 		offset += 4
 		return ret
 	}
@@ -66,7 +66,7 @@ func TestHelloWorld(t *testing.T) {
 	c.SetPC(mem.PageStart(1))
 	left := c.Run(1000)
 
-	if left < 850 {
+	if left > 150 {
 		t.Fail()
 	}
 

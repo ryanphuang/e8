@@ -6,9 +6,10 @@ type Page interface {
 }
 
 const (
-	pageOffset = 12
-	PageSize   = 1 << pageOffset
-	pageMask   = PageSize - 1
+	PageOffset = 12
+	PageSize   = 1 << PageOffset
+	PageMask   = PageSize - 1
 )
 
-func PageStart(i uint32) uint32 { return i << pageOffset }
+func PageStart(i uint32) uint32 { return i << PageOffset }
+func PageId(i uint32) uint32 { return i >> PageOffset }

@@ -13,7 +13,7 @@ func TestSingleInst(t *testing.T) {
 	p := mem.NewPage()
 	c.Map(0, p)
 
-	s := func(i uint32) {
+	s := func(i Inst) {
 		c.WriteReg(1, 0x1)
 		c.WriteReg(2, 0x20)
 		c.WriteReg(3, 0x300)
@@ -22,7 +22,7 @@ func TestSingleInst(t *testing.T) {
 		c.WriteReg(5, 0x31)
 		c.WriteReg(6, 0xfffffff0)
 
-		c.WriteU32(0, i)
+		c.WriteU32(0, i.U32())
 		c.SetPC(0)
 		c.Step()
 	}
@@ -30,7 +30,7 @@ func TestSingleInst(t *testing.T) {
 	r := Rinst
 	rs := RinstShamt
 
-	c4 := func(i uint32, v uint32) {
+	c4 := func(i Inst, v uint32) {
 		s(i)
 		if c.ReadReg(4) != v {
 			t.Fail()

@@ -1,5 +1,9 @@
 package inst
 
+type Inst uint32
+
+func (i Inst) U32() uint32 { return uint32(i) }
+
 type instFunc func(c Core, fields *fields)
 
 func makeInstList(m map[uint8]instFunc, n uint8) []instFunc {

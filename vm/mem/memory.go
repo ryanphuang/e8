@@ -7,7 +7,7 @@ type Memory struct {
 
 var noopPage = NewNoopPage()
 
-func NewMemory() *Memory {
+func New() *Memory {
 	ret := new(Memory)
 	ret.pages = make(map[uint32]Page)
 	ret.align = new(Align)
@@ -15,7 +15,7 @@ func NewMemory() *Memory {
 }
 
 func (self *Memory) Get(addr uint32) Page {
-	ret := self.pages[addr>>pageOffset]
+	ret := self.pages[PageId(addr)]
 	if ret == nil {
 		return noopPage
 	}
@@ -52,9 +52,9 @@ func (self *Memory) ReadU32(addr uint32) uint32 {
 }
 
 func (self *Memory) Map(addr uint32, page Page) {
-	self.pages[addr>>pageOffset] = page
+	self.pages[PageId(addr)] = page
 }
 
 func (self *Memory) Unmap(addr uint32) {
-	delete(self.pages, addr>>pageOffset)
+	delete(self.pages, PageId(addr))
 }

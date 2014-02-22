@@ -1,7 +1,7 @@
 package inst
 
 type fields struct {
-	inst  uint32
+	inst  Inst
 	rs    uint8
 	rt    uint8
 	rd    uint8

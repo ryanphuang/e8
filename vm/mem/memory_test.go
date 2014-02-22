@@ -35,7 +35,7 @@ func TestAlign(t *testing.T) {
 }
 
 func TestMemory(t *testing.T) {
-	m := NewMemory()
+	m := New()
 	p := NewPage()
 	m.Map(4096, p)
 	m.WriteU32(4096+1024+3, 0x01020304)

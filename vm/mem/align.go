@@ -8,7 +8,7 @@ type Align struct {
 	Page
 }
 
-func maskOffset(offset uint32) uint32 { return offset & pageMask }
+func maskOffset(offset uint32) uint32 { return offset & PageMask }
 
 func offset8(offset uint32) uint32 {
 	return maskOffset(offset)
