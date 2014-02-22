@@ -12,4 +12,4 @@ const (
 )
 
 func PageStart(i uint32) uint32 { return i << PageOffset }
-func PageId(i uint32) uint32 { return i >> PageOffset }
+func PageId(i uint32) uint32    { return i >> PageOffset }
