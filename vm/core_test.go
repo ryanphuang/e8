@@ -70,7 +70,7 @@ func TestHelloWorld(t *testing.T) {
 		t.Fail()
 	}
 
-	if !c.Halt || c.HaltValue != 0 || c.AddrError {
+	if !c.RIP() {
 		t.Fail()
 	}
 

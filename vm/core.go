@@ -9,13 +9,17 @@ import (
 	"github.com/h8liu/e8/vm/mem"
 )
 
+type registers struct{ *Registers }
+type memory struct{ *mem.Memory }
+
 type Core struct {
-	*Registers
-	*mem.Memory
-	*SysPage
+	registers
+	memory
+
 	Stdout io.Writer
 	Log    io.Writer
 
+	sys *SysPage
 	alu *inst.ALU
 }
 
@@ -35,14 +39,14 @@ func NewCore() *Core {
 func New() *Core {
 	ret := NewCore()
 
-	ret.SysPage = NewSysPage()
-	ret.Memory.Map(0, ret.SysPage)
+	ret.sys = NewSysPage()
+	ret.Memory.Map(0, ret.sys)
 
 	return ret
 }
 
 func (self *Core) Step() {
-	self.SysPage.ClearError()
+	self.sys.ClearError()
 
 	pc := self.IncPC()
 	in := self.Memory.ReadU32(pc)
@@ -52,7 +56,7 @@ func (self *Core) Step() {
 	}
 	self.alu.Inst(self, inst.Inst(in))
 
-	self.SysPage.FlushStdout(self.Stdout)
+	self.sys.FlushStdout(self.Stdout)
 }
 
 func (self *Core) Run(n uint32) uint32 {
@@ -61,7 +65,7 @@ func (self *Core) Run(n uint32) uint32 {
 		self.Step()
 		i++
 
-		if self.SysPage.Halted() {
+		if self.sys.Halted() {
 			break
 		}
 	}
@@ -71,4 +75,11 @@ func (self *Core) Run(n uint32) uint32 {
 
 func (self *Core) SetPC(pc uint32) {
 	self.Registers.WriteReg(inst.RegPC, pc)
+}
+
+func (self *Core) Halted() bool     { return self.sys.Halted() }
+func (self *Core) AddrError() bool  { return self.sys.AddrError }
+func (self *Core) HaltValue() uint8 { return self.sys.HaltValue }
+func (self *Core) RIP() bool {
+	return self.Halted() && self.HaltValue() == 0 && !self.AddrError()
 }
