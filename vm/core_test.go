@@ -64,9 +64,9 @@ func TestHelloWorld(t *testing.T) {
 	w(Iinst(inst.OpSb, 0, 0, 0x0004))   // 020
 
 	c.SetPC(mem.PageStart(1))
-	left := c.Run(1000)
+	used := c.Run(1000)
 
-	if left > 150 {
+	if used > 150 {
 		t.Fail()
 	}
 
