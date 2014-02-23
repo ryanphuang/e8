@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"os"
 
-	"github.com/h8liu/e8/mmap"
+	"github.com/h8liu/e8/img"
 	"github.com/h8liu/e8/vm/inst"
 	"github.com/h8liu/e8/vm/mem"
 )
@@ -61,7 +61,7 @@ func makeMap() []byte {
 	str := "Hello, world.\n"
 
 	ret := new(bytes.Buffer)
-	w := mmap.NewWriter(ret)
+	w := img.NewWriter(ret)
 	w.Write(mem.PageStart(1), hello())
 	w.Write(mem.PageStart(2), []byte(str+"\000"))
 
@@ -69,7 +69,7 @@ func makeMap() []byte {
 }
 
 func main() {
-	c, e := mmap.Make(bytes.NewBuffer(makeMap()))
+	c, e := img.Make(bytes.NewBuffer(makeMap()))
 	if e != nil {
 		panic(e)
 	}

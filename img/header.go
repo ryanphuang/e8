@@ -1,4 +1,4 @@
-package mmap
+package img
 
 import (
 	"io"
