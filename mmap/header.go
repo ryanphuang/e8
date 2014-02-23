@@ -1,4 +1,4 @@
-package bin
+package mmap
 
 import (
 	"io"
