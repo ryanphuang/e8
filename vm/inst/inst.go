@@ -136,4 +136,3 @@ func opJ(c Core, f *fields) {
 }
 
 func opNoop(c Core, f *fields) {}
-
