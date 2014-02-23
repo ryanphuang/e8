@@ -58,10 +58,9 @@ func LoadInto(c *vm.Core, in io.Reader) error {
 
 			if cur == 0 || cur != id {
 				cur = id
-				p = c.Get(cur)
-				if p == nil {
+				if !c.Valid(addr) {
 					p = mem.NewPage()
-					c.Map(cur, p)
+					c.Map(addr, p)
 				}
 			}
 
@@ -70,28 +69,4 @@ func LoadInto(c *vm.Core, in io.Reader) error {
 	}
 
 	return nil
-}
-
-func Write(out io.Writer, addr uint32, bytes []byte) (e error) {
-	n := uint64(len(bytes))
-	if n > (1 << 31) {
-		// this is almost impossible to happen
-		return fmt.Errorf("too many bytes")
-	}
-	if uint64(addr)+n > (1 << 32) {
-		return fmt.Errorf("out of memory space")
-	}
-
-	header := new(Header)
-	header.addr = addr
-	header.size = uint32(n)
-	if e = header.WriteTo(out); e != nil {
-		return e
-	}
-
-	if _, e = out.Write(bytes); e != nil {
-		return e
-	}
-
-	return
 }

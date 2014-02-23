@@ -1,34 +1,33 @@
 package main
 
 import (
+	"bytes"
 	"os"
 
-	"github.com/h8liu/e8/vm"
+	"github.com/h8liu/e8/mmap"
 	"github.com/h8liu/e8/vm/inst"
 	"github.com/h8liu/e8/vm/mem"
 )
 
-func main() {
-	c := vm.New()
-	str := "Hello, world.\n"
-	c.Stdout = os.Stdout
+func pu32(buf []byte, i uint32) {
+	buf[0] = uint8(i)
+	buf[1] = uint8(i >> 8)
+	buf[2] = uint8(i >> 16)
+	buf[3] = uint8(i >> 24)
+}
 
-	dpage := mem.NewPage()
-	copy(dpage.Bytes(), []byte(str+"\000"))
+func hello() []byte {
+	ret := new(bytes.Buffer)
+	buf := make([]byte, 4)
 
-	ipage := mem.NewPage()
-	c.Map(mem.PageStart(1), ipage)
-	c.Map(mem.PageStart(2), dpage)
-
-	a := &mem.Align{ipage}
-
-	offset := uint32(0)
-	w := func(i inst.Inst) uint32 {
-		ret := offset
-		a.WriteU32(offset, i.U32())
-		offset += 4
-		return ret
+	w := func(i inst.Inst) {
+		pu32(buf, i.U32())
+		ret.Write(buf)
 	}
+
+	Rinst := inst.Rinst
+	Iinst := inst.Iinst
+	Jinst := inst.Jinst
 
 	/*
 			add $1, $0, $0		; init counter
@@ -45,10 +44,6 @@ func main() {
 			sb $0, 0x4($0)
 	*/
 
-	Rinst := inst.Rinst
-	Iinst := inst.Iinst
-	Jinst := inst.Jinst
-
 	w(Rinst(0, 0, 1, inst.FnAdd))       // 000
 	w(Iinst(inst.OpLbu, 1, 2, 0x2000))  // 004
 	w(Iinst(inst.OpBeq, 2, 0, 0x0005))  // 008
@@ -59,7 +54,29 @@ func main() {
 	w(Jinst(-7))                        // 01c
 	w(Iinst(inst.OpSb, 0, 0, 0x0004))   // 020
 
+	return ret.Bytes()
+}
+
+func makeMap() []byte {
+	str := "Hello, world.\n"
+
+	ret := new(bytes.Buffer)
+	w := mmap.NewWriter(ret)
+	w.Write(mem.PageStart(1), hello())
+	w.Write(mem.PageStart(2), []byte(str+"\000"))
+
+	return ret.Bytes()
+}
+
+func main() {
+	c, e := mmap.Make(bytes.NewBuffer(makeMap()))
+	if e != nil {
+		panic(e)
+	}
+
+	c.Stdout = os.Stdout
 	c.SetPC(mem.PageStart(1))
+
 	c.Run(200)
 
 	if !c.RIP() {

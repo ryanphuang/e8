@@ -22,6 +22,10 @@ func (self *Memory) Get(addr uint32) Page {
 	return ret
 }
 
+func (self *Memory) Valid(addr uint32) bool {
+	return self.pages[PageId(addr)] != nil
+}
+
 func (self *Memory) Align(addr uint32) *Align {
 	self.align.Page = self.Get(addr)
 	return self.align
