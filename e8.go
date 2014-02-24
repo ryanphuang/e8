@@ -58,12 +58,12 @@ func hello() []byte {
 }
 
 func makeMap() []byte {
-	str := "Hello, world.\n"
+	str := "Hello, world.\n\000"
 
 	ret := new(bytes.Buffer)
 	w := img.NewWriter(ret)
 	w.Write(mem.PageStart(1), hello())
-	w.Write(mem.PageStart(2), []byte(str+"\000"))
+	w.Write(mem.PageStart(2), []byte(str))
 
 	return ret.Bytes()
 }
