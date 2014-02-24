@@ -1,4 +1,4 @@
-** Road Plan **
+**Road Plan**
 
 - Build a MISP-like very simple virtual machine
 - Build an assembler
