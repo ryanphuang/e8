@@ -45,12 +45,14 @@ func TestSingleInst(t *testing.T) {
 	c4(r(2, 3, 4, FnAdd), 0x320)
 	c4(r(3, 2, 4, FnAdd), 0x320)
 	c4(r(3, 3, 4, FnAdd), 0x600)
+	c4(r(2, 6, 4, FnAdd), 0x10)
 
 	c4(r(0, 0, 4, FnSub), 0)
 	c4(r(2, 0, 4, FnSub), 0x20)
 	c4(r(2, 3, 4, FnSub), 0xfffffd20)
 	c4(r(3, 2, 4, FnSub), 0x300-0x20)
 	c4(r(3, 3, 4, FnSub), 0)
+	c4(r(2, 6, 4, FnSub), 0x30)
 
 	c4(r(0, 0, 4, FnAnd), 0)
 	c4(r(2, 2, 4, FnAnd), 0x20)
@@ -75,4 +77,7 @@ func TestSingleInst(t *testing.T) {
 
 	c4(r(2, 3, 4, FnXor), 0x320)
 	c4(r(5, 2, 4, FnXor), 0x11)
+
+	c4(r(2, 3, 4, FnOr), 0x320)
+	c4(r(5, 2, 4, FnOr), 0x31)
 }
