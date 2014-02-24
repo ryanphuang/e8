@@ -10,3 +10,10 @@
 - Can only access other modules via publicly defined interfaces, methods, functions, types, consts
 - This is just for single vm open source testing
 - For more complex stuff, we can have multiple vm testing, where all calls are performed over network RPC calls
+
+**Why**
+
+- This could be an online platform for ACM training
+- This could be an online arena for game AI fighting
+- This could be used for collaborative programming
+- Ideally, all the modules and interfaces could be easily reused
