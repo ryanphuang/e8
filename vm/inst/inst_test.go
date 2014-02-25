@@ -81,8 +81,8 @@ func TestSingleInst(t *testing.T) {
 	c4(r(2, 3, 4, FnOr), 0x320)
 	c4(r(5, 2, 4, FnOr), 0x31)
 
-	c4(r(2, 3, 4, FnNor), 0xffffffff - 0x320)
-	c4(r(5, 2, 4, FnNor), 0xffffffff - 0x31)
+	c4(r(2, 3, 4, FnNor), 0xffffffff-0x320)
+	c4(r(5, 2, 4, FnNor), 0xffffffff-0x31)
 
 	c4(r(5, 2, 4, FnSlt), 0)
 	c4(r(2, 5, 4, FnSlt), 1)
