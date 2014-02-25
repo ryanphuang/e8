@@ -46,7 +46,7 @@ func TestMemory(t *testing.T) {
 
 	m.WriteU32(0x2, 0x13431c32)
 	u32 := m.ReadU32(0x3)
-	if u32 != 0 {
+	if u32 != 0x13431c32 {
 		t.Fail()
 	}
 }
