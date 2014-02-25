@@ -26,12 +26,12 @@ func (self *Registers) ReadReg(a uint8) uint32   { return self.regs[a] }
 func (self *Registers) ReadFreg(a uint8) float64 { return self.fregs[a] }
 
 func (self *Registers) WriteReg(a uint8, v uint32) {
-	self.regs[a] = v
-
 	if a == 0 {
-		self.regs[0] = 0
+		// do nothing
 	} else if a == inst.RegPC {
-		self.regs[inst.RegPC] = align.U32(self.regs[inst.RegPC])
+		self.regs[inst.RegPC] = align.U32(v)
+	} else {
+		self.regs[a] = v
 	}
 }
 
