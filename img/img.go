@@ -58,7 +58,7 @@ func LoadInto(c *vm.Core, in io.Reader) error {
 
 			if cur == 0 || cur != id {
 				cur = id
-				if !c.Valid(addr) {
+				if !c.Check(addr) {
 					p = mem.NewPage()
 					c.Map(addr, p)
 				}

@@ -4,6 +4,14 @@ import (
 	"github.com/h8liu/e8/vm/align"
 )
 
+// A page wrapper that takes a page and perform aligned reads
+// and writes in a page.
+// Byte order is little endian.
+// Read and writes are performed byte by byte,
+// where lower bytes are written/read first.
+//
+// If the offset is not properly aligned, it will be aligned down
+// automatically.
 type Align struct {
 	Page
 }
