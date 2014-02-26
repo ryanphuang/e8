@@ -1,8 +1,8 @@
 package e8asm
 
 import (
-	"io"
 	"bufio"
+	"io"
 )
 
 type lexer struct {
@@ -14,4 +14,3 @@ func newLexer(in io.Reader) *lexer {
 	ret.scanner = bufio.NewScanner(in)
 	return ret
 }
-

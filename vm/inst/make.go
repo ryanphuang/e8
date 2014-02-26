@@ -27,3 +27,7 @@ func Jinst(ad int32) Inst {
 	ret |= uint32(ad) & 0x3ffffff
 	return Inst(ret)
 }
+
+func Noop() Inst {
+	return Inst(0)
+}
