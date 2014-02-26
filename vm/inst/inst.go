@@ -3,6 +3,10 @@ package inst
 type Inst uint32
 
 func (i Inst) U32() uint32 { return uint32(i) }
+func (i Inst) Op() uint8   { return uint8(i >> 26) }
+func (i Inst) Rs() uint8   { return uint8(i>>21) & 0x1f }
+func (i Inst) Rt() uint8   { return uint8(i>>16) & 0x1f }
+func (i Inst) Rd() uint8   { return uint8(i>>11) & 0x1f }
 
 type instFunc func(c Core, fields *fields)
 

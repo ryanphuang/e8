@@ -9,15 +9,46 @@ import (
 )
 
 type Line struct {
-	in     inst.Inst
-	label  string
-	isJump bool
+	in    inst.Inst
+	label string
 }
 
 func newLine(in inst.Inst) *Line {
 	ret := new(Line)
 	ret.in = in
 	return ret
+}
+
+func (self *Line) IsJump() bool {
+	return self.in.Op() == inst.OpJ
+}
+
+func (self *Line) Op() uint8 {
+	return self.in.Op()
+}
+
+func (self *Line) IsBranch() bool {
+	op := self.in.Op()
+	return op == inst.OpBne || op == inst.OpBeq
+}
+
+func (self *Line) String() string {
+	if self.label != "" {
+		op := self.in.Op()
+		if op == inst.OpJ {
+			return fmt.Sprintf("j %s", self.label)
+		} else if op == inst.OpBne {
+			return fmt.Sprintf("bne $%d, $%d, %s",
+				self.in.Rs(), self.in.Rt(), self.label,
+			)
+		} else if op == inst.OpBeq {
+			return fmt.Sprintf("beq $%d, $%d, %s",
+				self.in.Rs(), self.in.Rt(), self.label,
+			)
+		}
+	}
+
+	return self.in.String()
 }
 
 func ef(s string, args ...interface{}) (*Line, error) {
@@ -46,61 +77,63 @@ func opSplit(s string) (op, args string) {
 	return
 }
 
-var r3Insts = map[string]uint8{
-	"add": inst.FnAdd,
-	"sub": inst.FnSub,
-	"and": inst.FnAnd,
-	"or":  inst.FnOr,
-	"xor": inst.FnXor,
-	"nor": inst.FnXor,
-	"slt": inst.FnSlt,
+var (
+	r3Insts = map[string]uint8{
+		"add": inst.FnAdd,
+		"sub": inst.FnSub,
+		"and": inst.FnAnd,
+		"or":  inst.FnOr,
+		"xor": inst.FnXor,
+		"nor": inst.FnXor,
+		"slt": inst.FnSlt,
 
-	"mul":  inst.FnMul,
-	"mulu": inst.FnMulu,
-	"div":  inst.FnDiv,
-	"divu": inst.FnDivu,
-	"mod":  inst.FnMod,
-	"modu": inst.FnModu,
-}
+		"mul":  inst.FnMul,
+		"mulu": inst.FnMulu,
+		"div":  inst.FnDiv,
+		"divu": inst.FnDivu,
+		"mod":  inst.FnMod,
+		"modu": inst.FnModu,
+	}
 
-var r3rInsts = map[string]uint8{
-	"sllv": inst.FnSllv,
-	"srlv": inst.FnSrlv,
-	"srav": inst.FnSrav,
-}
+	r3rInsts = map[string]uint8{
+		"sllv": inst.FnSllv,
+		"srlv": inst.FnSrlv,
+		"srav": inst.FnSrav,
+	}
 
-var r3sInsts = map[string]uint8{
-	"sll": inst.FnSll,
-	"srl": inst.FnSrl,
-	"sra": inst.FnSra,
-}
+	r3sInsts = map[string]uint8{
+		"sll": inst.FnSll,
+		"srl": inst.FnSrl,
+		"sra": inst.FnSra,
+	}
 
-var i3aInsts = map[string]uint8{
-	"lw":  inst.OpLw,
-	"lhs": inst.OpLhs,
-	"lhu": inst.OpLhu,
-	"lbs": inst.OpLbs,
-	"lbu": inst.OpLbu,
-	"sw":  inst.OpSw,
-	"sh":  inst.OpSh,
-	"sb":  inst.OpSb,
-}
+	i3aInsts = map[string]uint8{
+		"lw":  inst.OpLw,
+		"lhs": inst.OpLhs,
+		"lhu": inst.OpLhu,
+		"lbs": inst.OpLbs,
+		"lbu": inst.OpLbu,
+		"sw":  inst.OpSw,
+		"sh":  inst.OpSh,
+		"sb":  inst.OpSb,
+	}
 
-var i3Insts = map[string]uint8{
-	"addi": inst.OpAddi,
-	"andi": inst.OpAndi,
-	"ori":  inst.OpOri,
-	"slti": inst.OpSlti,
-}
+	i3Insts = map[string]uint8{
+		"addi": inst.OpAddi,
+		"andi": inst.OpAndi,
+		"ori":  inst.OpOri,
+		"slti": inst.OpSlti,
+	}
 
-var i2Insts = map[string]uint8{
-	"lui": inst.OpLui,
-}
+	i2Insts = map[string]uint8{
+		"lui": inst.OpLui,
+	}
 
-var bInsts = map[string]uint8{
-	"bne": inst.OpBne,
-	"beq": inst.OpBeq,
-}
+	bInsts = map[string]uint8{
+		"bne": inst.OpBne,
+		"beq": inst.OpBeq,
+	}
+)
 
 func ParseLine(s string) (*Line, error) {
 	s = trim(s)
@@ -129,7 +162,26 @@ func ParseLine(s string) (*Line, error) {
 }
 
 func isIdent(s string) bool {
-	panic("todo")
+	for i, c := range s {
+		if c == '_' {
+			continue
+		}
+		if c >= 'a' && c <= 'z' {
+			continue
+		}
+		if c >= 'A' && c <= 'Z' {
+			continue
+		}
+		if c >= '0' && c <= '9' {
+			if i == 0 {
+				return false
+			}
+			continue
+		}
+		return false
+	}
+
+	return true
 }
 
 func parseInt(s string) (int64, error) {
@@ -213,7 +265,6 @@ func jLine(code uint8, args string) (*Line, error) {
 
 	ret := newLine(inst.Jinst(0))
 	ret.label = args
-	ret.isJump = true
 
 	return ret, nil
 }
@@ -276,8 +327,53 @@ func i3Line(code uint8, args string) (*Line, error) {
 	return ret, nil
 }
 
+func parseAddr(s string) (im uint16, rs uint8, valid bool) {
+	ns := len(s)
+	if s[ns-1] != ')' {
+		// bare signed im
+		im, valid = parseIms(s)
+		if !valid {
+			return 0, 0, false
+		}
+		return im, 0, true
+	}
+	sep := strings.Index(s, "(")
+	if sep < 0 {
+		return 0, 0, false
+	}
+
+	imStr := s[:sep]
+	regStr := s[sep+1 : ns-1]
+	im, valid = parseIms(imStr)
+	if !valid {
+		return 0, 0, false
+	}
+	rs, valid = parseReg(regStr)
+	if !valid {
+		return 0, 0, false
+	}
+
+	return im, rs, true
+}
+
 func i3aLine(code uint8, args string) (*Line, error) {
-	panic("todo")
+	fs := fields(args)
+	if len(fs) != 2 {
+		return ef("invalid field count")
+	}
+
+	rt, valid := parseReg(fs[0])
+	if !valid {
+		return ef("first field not register")
+	}
+
+	im, rs, valid := parseAddr(fs[2])
+	if !valid {
+		return ef("second field not an address")
+	}
+
+	ret := newLine(inst.Iinst(code, rs, rt, im))
+	return ret, nil
 }
 
 func i2Line(code uint8, args string) (*Line, error) {
