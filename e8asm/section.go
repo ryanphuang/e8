@@ -3,8 +3,8 @@ package e8asm
 import (
 	"fmt"
 	"io"
-	"strings"
 	"math"
+	"strings"
 
 	"github.com/h8liu/e8/vm/inst"
 )
@@ -110,14 +110,14 @@ func (self *Section) CompileTo(out io.Writer) error {
 
 func (self *Section) FillLabels(locator Locator, err io.Writer) {
 	for i, line := range self.lines {
-		curPos := self.Start + uint32(i << 2) + 4
+		curPos := self.Start + uint32(i<<2) + 4
 		if line.IsJump() {
 			pos, found := self.Locate(line.label)
 			if !found {
 				pos, found = locator.Locate(line.label)
 			}
-			offset := int32(pos - curPos) >> 2
-			if offset > (0x1 << 25) - 1 {
+			offset := int32(pos-curPos) >> 2
+			if offset > (0x1<<25)-1 {
 				panic("jump out of range") // TODO
 			} else if offset < -(0x1 << 25) {
 				panic("jump out of range") // TODO
@@ -129,7 +129,7 @@ func (self *Section) FillLabels(locator Locator, err io.Writer) {
 			if !found {
 				pos, found = locator.Locate(line.label)
 			}
-			offset := int32(pos - curPos) >> 2
+			offset := int32(pos-curPos) >> 2
 			if offset > math.MaxInt16 {
 				panic("branch out of range") // TODO
 			} else if offset < math.MinInt16 {
