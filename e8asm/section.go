@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"math"
+
+	"github.com/h8liu/e8/vm/inst"
 )
 
 type Section struct {
@@ -75,7 +78,7 @@ func (self *Section) PrintTo(out io.Writer) error {
 	return nil
 }
 
-func (self *Section) LocateLabel(lab string) (uint32, bool) {
+func (self *Section) Locate(lab string) (uint32, bool) {
 	label, found := self.labelMap[lab]
 	if !found {
 		return 0, false
@@ -84,6 +87,59 @@ func (self *Section) LocateLabel(lab string) (uint32, bool) {
 	return uint32(label.index<<2) + self.Start, true
 }
 
-func (self *Section) CompileTo(out io.Writer) {
-	panic("todo")
+func pu32(buf []byte, i uint32) {
+	buf[0] = uint8(i)
+	buf[1] = uint8(i >> 8)
+	buf[2] = uint8(i >> 16)
+	buf[3] = uint8(i >> 24)
+}
+
+func (self *Section) CompileTo(out io.Writer) error {
+	buf := make([]byte, 4)
+
+	for _, line := range self.lines {
+		pu32(buf, line.in.U32())
+		_, e := out.Write(buf)
+		if e != nil {
+			return e
+		}
+	}
+
+	return nil
+}
+
+func (self *Section) FillLabels(locator Locator, err io.Writer) {
+	for i, line := range self.lines {
+		curPos := self.Start + uint32(i << 2) + 4
+		if line.IsJump() {
+			pos, found := self.Locate(line.label)
+			if !found {
+				pos, found = locator.Locate(line.label)
+			}
+			offset := int32(pos - curPos) >> 2
+			if offset > (0x1 << 25) - 1 {
+				panic("jump out of range") // TODO
+			} else if offset < -(0x1 << 25) {
+				panic("jump out of range") // TODO
+			}
+
+			line.in = inst.Jinst(offset)
+		} else if line.IsBranch() {
+			pos, found := self.Locate(line.label)
+			if !found {
+				pos, found = locator.Locate(line.label)
+			}
+			offset := int32(pos - curPos) >> 2
+			if offset > math.MaxInt16 {
+				panic("branch out of range") // TODO
+			} else if offset < math.MinInt16 {
+				panic("branch out of range") // TODO
+			}
+
+			_in := line.in.U32()
+			_in &= 0xffff0000
+			_in |= uint32(uint16(int16(offset)))
+			line.in = inst.Inst(_in)
+		}
+	}
 }

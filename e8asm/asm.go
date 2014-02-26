@@ -22,10 +22,18 @@ type Assembler struct {
 	Filename string
 }
 
+var _ Locator = new(Assembler)
+
+func (self *Assembler) Locate(s string) (uint32, bool) {
+	// TODO
+	return 0, false
+}
+
 func (self *Assembler) Assemble() error {
 	scanner := bufio.NewScanner(self.In)
 	sec := NewSection("")
 	lineno := 0
+	var lastError error
 	for scanner.Scan() {
 		lineno++
 		line := scanner.Text()
@@ -38,20 +46,28 @@ func (self *Assembler) Assemble() error {
 			e := sec.Label(line)
 			if e != nil {
 				fmt.Printf("%d: %v\n", lineno, e)
+				lastError = e
 			}
 		} else {
 			e := sec.Line(line, lineno)
 			if e != nil {
 				fmt.Printf("%d: %v\n", lineno, e)
+				lastError = e
 			}
 		}
+	}
+
+	if lastError != nil {
+		return lastError
 	}
 
 	if scanner.Err() != nil {
 		return scanner.Err()
 	}
 
-	e := sec.PrintTo(self.Out)
+	sec.FillLabels(self, nil)
+
+	e := sec.CompileTo(self.Out)
 	if e != nil {
 		return e
 	}

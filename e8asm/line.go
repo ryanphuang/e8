@@ -2,10 +2,11 @@ package e8asm
 
 import (
 	"fmt"
-	"github.com/h8liu/e8/vm/inst"
 	"math"
 	"strconv"
 	"strings"
+
+	"github.com/h8liu/e8/vm/inst"
 )
 
 type Line struct {
@@ -123,11 +124,14 @@ var (
 		"sb":  inst.OpSb,
 	}
 
-	i3Insts = map[string]uint8{
+	i3sInsts = map[string]uint8{
 		"addi": inst.OpAddi,
+		"slti": inst.OpSlti,
+	}
+
+	i3uInsts = map[string]uint8{
 		"andi": inst.OpAndi,
 		"ori":  inst.OpOri,
-		"slti": inst.OpSlti,
 	}
 
 	i2Insts = map[string]uint8{
@@ -149,8 +153,10 @@ func ParseLine(s string) (*Line, error) {
 		return jLine(inst.OpJ, args)
 	} else if code, found := bInsts[op]; found {
 		return bLine(code, args)
-	} else if code, found := i3Insts[op]; found {
-		return i3Line(code, args)
+	} else if code, found := i3sInsts[op]; found {
+		return i3sLine(code, args)
+	} else if code, found := i3uInsts[op]; found {
+		return i3uLine(code, args)
 	} else if code, found := i3aInsts[op]; found {
 		return i3aLine(code, args)
 	} else if code, found := i2Insts[op]; found {
@@ -300,7 +306,7 @@ func bLine(code uint8, args string) (*Line, error) {
 	return ret, nil
 }
 
-func i3Line(code uint8, args string) (*Line, error) {
+func i3sLine(code uint8, args string) (*Line, error) {
 	fs := fields(args)
 	if len(fs) != 3 {
 		return lef("invalid field count")
@@ -315,17 +321,33 @@ func i3Line(code uint8, args string) (*Line, error) {
 		return lef("second field not register")
 	}
 
-	im := uint16(0)
-	if code == inst.OpSlti {
-		im, valid = parseIms(fs[2])
-		if !valid {
-			return lef("third field not a signed immediate")
-		}
-	} else {
-		im, valid = parseImu(fs[2])
-		if !valid {
-			return lef("third field not an unsigned immediate")
-		}
+	im, valid := parseIms(fs[2])
+	if !valid {
+		return lef("third field not a signed immediate")
+	}
+
+	ret := newLine(inst.Iinst(code, rs, rt, im))
+	return ret, nil
+}
+
+func i3uLine(code uint8, args string) (*Line, error) {
+	fs := fields(args)
+	if len(fs) != 3 {
+		return lef("invalid field count")
+	}
+
+	rt, valid := parseReg(fs[0])
+	if !valid {
+		return lef("first field not register")
+	}
+	rs, valid := parseReg(fs[1])
+	if !valid {
+		return lef("second field not register")
+	}
+
+	im, valid := parseImu(fs[2])
+	if !valid {
+		return lef("third field not an unsigned immediate")
 	}
 
 	ret := newLine(inst.Iinst(code, rs, rt, im))
