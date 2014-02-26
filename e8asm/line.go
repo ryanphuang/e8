@@ -9,8 +9,9 @@ import (
 )
 
 type Line struct {
-	in    inst.Inst
-	label string
+	in     inst.Inst
+	label  string
+	lineno int
 }
 
 func newLine(in inst.Inst) *Line {

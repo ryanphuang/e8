@@ -23,11 +23,12 @@ func NewSection(name string) *Section {
 	return ret
 }
 
-func (self *Section) Line(s string) error {
+func (self *Section) Line(s string, lineno int) error {
 	line, e := ParseLine(s)
 	if e != nil {
 		return e
 	}
+	line.lineno = lineno
 
 	self.lines = append(self.lines, line)
 	return nil

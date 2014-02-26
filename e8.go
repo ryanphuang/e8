@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"strings"
 
@@ -93,14 +94,21 @@ func main() {
 			lbu $2, 0x2000($1)  ; load byte
 			beq $2, $0, end     ; +5
 		wait:
-			lbu $3, 0x5($0)     ; is output ready?
+			lbu $3, 5           ; is output ready?
 			bne $3, $0, wait    ; -2
-			sb $2, 0x5($0)      ; output byte
+			sb $2, 5            ; output byte
 			addi $1, $1, 1      ; increase counter
 			j loop              ; -7
 		end:
 			sb $0, 0x4($0)
 	`)
 
-	e8asm.Assemble(buf, os.Stdout)
+	asm := &e8asm.Assembler{
+		In:  buf,
+		Out: os.Stdout,
+	}
+	e := asm.Assemble()
+	if e != nil {
+		fmt.Println(e)
+	}
 }

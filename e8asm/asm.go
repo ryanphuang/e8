@@ -16,8 +16,14 @@ func trimLine(s string) string {
 	return trim(s)
 }
 
-func Assemble(in io.Reader, out io.Writer) error {
-	scanner := bufio.NewScanner(in)
+type Assembler struct {
+	In       io.Reader
+	Out      io.Writer
+	Filename string
+}
+
+func (self *Assembler) Assemble() error {
+	scanner := bufio.NewScanner(self.In)
 	sec := NewSection("")
 	lineno := 0
 	for scanner.Scan() {
@@ -34,7 +40,7 @@ func Assemble(in io.Reader, out io.Writer) error {
 				fmt.Printf("%d: %v\n", lineno, e)
 			}
 		} else {
-			e := sec.Line(line)
+			e := sec.Line(line, lineno)
 			if e != nil {
 				fmt.Printf("%d: %v\n", lineno, e)
 			}
@@ -45,7 +51,7 @@ func Assemble(in io.Reader, out io.Writer) error {
 		return scanner.Err()
 	}
 
-	e := sec.PrintTo(out)
+	e := sec.PrintTo(self.Out)
 	if e != nil {
 		return e
 	}
