@@ -93,6 +93,10 @@ func (i Inst) String() string {
 			return fmt.Sprintf("%s $%d, $%d, %d", op, rt, rs, ims)
 		}
 
+		i3 := func(op string) string {
+			return fmt.Sprintf("%s $%d, $%d, %d", op, rt, rs, im)
+		}
+
 		i3a := func(op string) string {
 			return fmt.Sprintf("%s $%d, %d($%d)", op, rt, ims, rs)
 		}
@@ -103,13 +107,13 @@ func (i Inst) String() string {
 		case OpBne:
 			return i3sr("bne")
 		case OpAddi:
-			return i3s("addi")
+			return i3("addi")
 		case OpSlti:
 			return i3s("slti")
 		case OpAndi:
-			return i3s("andi")
+			return i3("andi")
 		case OpOri:
-			return i3s("ori")
+			return i3("ori")
 		case OpLui:
 			return i2("lui")
 		case OpLw:
