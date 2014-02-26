@@ -3,7 +3,9 @@ package main
 import (
 	"bytes"
 	"os"
+	"strings"
 
+	"github.com/h8liu/e8/e8asm"
 	"github.com/h8liu/e8/img"
 	"github.com/h8liu/e8/vm/inst"
 	"github.com/h8liu/e8/vm/mem"
@@ -68,7 +70,7 @@ func makeMap() []byte {
 	return ret.Bytes()
 }
 
-func main() {
+func main2() {
 	c, e := img.Make(bytes.NewBuffer(makeMap()))
 	if e != nil {
 		panic(e)
@@ -82,4 +84,23 @@ func main() {
 	if !c.RIP() {
 		panic("error occured")
 	}
+}
+
+func main() {
+	buf := strings.NewReader(`
+			add $1, $0, $0      ; init counter
+		loop:
+			lbu $2, 0x2000($1)  ; load byte
+			beq $2, $0, end     ; +5
+		wait:
+			lbu $3, 0x5($0)     ; is output ready?
+			bne $3, $0, wait    ; -2
+			sb $2, 0x5($0)      ; output byte
+			addi $1, $1, 1      ; increase counter
+			j loop              ; -7
+		end:
+			sb $0, 0x4($0)
+	`)
+
+	e8asm.Assemble(buf, os.Stdout)
 }

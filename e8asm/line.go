@@ -51,8 +51,12 @@ func (self *Line) String() string {
 	return self.in.String()
 }
 
-func ef(s string, args ...interface{}) (*Line, error) {
+func lef(s string, args ...interface{}) (*Line, error) {
 	return nil, fmt.Errorf(s, args...)
+}
+
+func ef(s string, args ...interface{}) error {
+	return fmt.Errorf(s, args...)
 }
 
 func trim(s string) string  { return strings.TrimSpace(s) }
@@ -198,7 +202,7 @@ func parseReg(s string) (uint8, bool) {
 		return inst.RegPC, true
 	}
 
-	if s[0] != '$' || s[0] != 'r' {
+	if s[0] != '$' && s[0] != 'r' {
 		return 0, false
 	}
 
@@ -260,7 +264,7 @@ func parseImu(s string) (uint16, bool) {
 
 func jLine(code uint8, args string) (*Line, error) {
 	if !isIdent(args) {
-		return ef("invalid label")
+		return lef("invalid label")
 	}
 
 	ret := newLine(inst.Jinst(0))
@@ -272,21 +276,21 @@ func jLine(code uint8, args string) (*Line, error) {
 func bLine(code uint8, args string) (*Line, error) {
 	fs := fields(args)
 	if len(fs) != 3 {
-		return ef("invalid field count")
+		return lef("invalid field count")
 	}
 
 	rs, valid := parseReg(fs[0])
 	if !valid {
-		return ef("first field not register")
+		return lef("first field not register")
 	}
 	rt, valid := parseReg(fs[1])
 	if !valid {
-		return ef("second field not register")
+		return lef("second field not register")
 	}
 
 	label := fs[2]
 	if !isIdent(label) {
-		return ef("third field is not a label")
+		return lef("third field is not a label")
 	}
 
 	ret := newLine(inst.Iinst(code, rs, rt, 0))
@@ -298,28 +302,28 @@ func bLine(code uint8, args string) (*Line, error) {
 func i3Line(code uint8, args string) (*Line, error) {
 	fs := fields(args)
 	if len(fs) != 3 {
-		return ef("invalid field count")
+		return lef("invalid field count")
 	}
 
 	rt, valid := parseReg(fs[0])
 	if !valid {
-		return ef("first field not register")
+		return lef("first field not register")
 	}
 	rs, valid := parseReg(fs[1])
 	if !valid {
-		return ef("second field not register")
+		return lef("second field not register")
 	}
 
 	im := uint16(0)
 	if code == inst.OpSlti {
 		im, valid = parseIms(fs[2])
 		if !valid {
-			return ef("third field not a signed immediate")
+			return lef("third field not a signed immediate")
 		}
 	} else {
 		im, valid = parseImu(fs[2])
 		if !valid {
-			return ef("third field not an unsigned immediate")
+			return lef("third field not an unsigned immediate")
 		}
 	}
 
@@ -359,17 +363,17 @@ func parseAddr(s string) (im uint16, rs uint8, valid bool) {
 func i3aLine(code uint8, args string) (*Line, error) {
 	fs := fields(args)
 	if len(fs) != 2 {
-		return ef("invalid field count")
+		return lef("invalid field count")
 	}
 
 	rt, valid := parseReg(fs[0])
 	if !valid {
-		return ef("first field not register")
+		return lef("first field not register")
 	}
 
-	im, rs, valid := parseAddr(fs[2])
+	im, rs, valid := parseAddr(fs[1])
 	if !valid {
-		return ef("second field not an address")
+		return lef("second field not an address")
 	}
 
 	ret := newLine(inst.Iinst(code, rs, rt, im))
@@ -379,17 +383,17 @@ func i3aLine(code uint8, args string) (*Line, error) {
 func i2Line(code uint8, args string) (*Line, error) {
 	fs := fields(args)
 	if len(fs) != 2 {
-		return ef("invalid field count")
+		return lef("invalid field count")
 	}
 
 	rt, valid := parseReg(fs[0])
 	if !valid {
-		return ef("first field not register")
+		return lef("first field not register")
 	}
 
 	im, valid := parseIms(fs[2])
 	if !valid {
-		return ef("second field not a signed immediate")
+		return lef("second field not a signed immediate")
 	}
 
 	ret := newLine(inst.Iinst(code, 0, rt, im))
@@ -399,20 +403,20 @@ func i2Line(code uint8, args string) (*Line, error) {
 func r3Line(code uint8, args string) (*Line, error) {
 	fs := fields(args)
 	if len(fs) != 3 {
-		return ef("invalid field count")
+		return lef("invalid field count")
 	}
 
 	rd, valid := parseReg(fs[0])
 	if !valid {
-		return ef("first field not register")
+		return lef("first field not register")
 	}
 	rs, valid := parseReg(fs[1])
 	if !valid {
-		return ef("second field not register")
+		return lef("second field not register")
 	}
 	rt, valid := parseReg(fs[2])
 	if !valid {
-		return ef("third field not register")
+		return lef("third field not register")
 	}
 
 	ret := newLine(inst.Rinst(rs, rt, rd, code))
@@ -422,20 +426,20 @@ func r3Line(code uint8, args string) (*Line, error) {
 func r3rLine(code uint8, args string) (*Line, error) {
 	fs := fields(args)
 	if len(fs) != 3 {
-		return ef("invalid field count")
+		return lef("invalid field count")
 	}
 
 	rd, valid := parseReg(fs[0])
 	if !valid {
-		return ef("first field not register")
+		return lef("first field not register")
 	}
 	rt, valid := parseReg(fs[1])
 	if !valid {
-		return ef("second field not register")
+		return lef("second field not register")
 	}
 	rs, valid := parseReg(fs[2])
 	if !valid {
-		return ef("third field not register")
+		return lef("third field not register")
 	}
 
 	ret := newLine(inst.Rinst(rs, rt, rd, code))
@@ -445,20 +449,20 @@ func r3rLine(code uint8, args string) (*Line, error) {
 func r3sLine(code uint8, args string) (*Line, error) {
 	fs := fields(args)
 	if len(fs) != 3 {
-		return ef("invalid field count")
+		return lef("invalid field count")
 	}
 
 	rd, valid := parseReg(fs[0])
 	if !valid {
-		return ef("first field not register")
+		return lef("first field not register")
 	}
 	rt, valid := parseReg(fs[1])
 	if !valid {
-		return ef("second field not register")
+		return lef("second field not register")
 	}
 	shamt, valid := parseShamt(fs[2])
 	if !valid {
-		return ef("third field not shamt")
+		return lef("third field not shamt")
 	}
 
 	ret := newLine(inst.RinstShamt(0, rt, rd, shamt, code))

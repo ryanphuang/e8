@@ -24,12 +24,19 @@ func Assemble(in io.Reader, out io.Writer) error {
 		lineno++
 		line := scanner.Text()
 		line = trimLine(line)
+		if line == "" {
+			continue
+		}
+
 		if strings.HasSuffix(line, ":") {
-			// label
+			e := sec.Label(line)
+			if e != nil {
+				fmt.Printf("%d: %v\n", lineno, e)
+			}
 		} else {
 			e := sec.Line(line)
 			if e != nil {
-				fmt.Println(lineno, e)
+				fmt.Printf("%d: %v\n", lineno, e)
 			}
 		}
 	}
@@ -38,7 +45,10 @@ func Assemble(in io.Reader, out io.Writer) error {
 		return scanner.Err()
 	}
 
-	fmt.Println(sec)
+	e := sec.PrintTo(out)
+	if e != nil {
+		return e
+	}
 
 	return nil
 }
