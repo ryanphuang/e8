@@ -26,6 +26,9 @@ func NewSection(name string) *Section {
 	return ret
 }
 
+func (self *Section) Nline() int   { return len(self.lines) }
+func (self *Section) Size() uint32 { return uint32(self.Nline() << 2) }
+
 func (self *Section) Line(s string, lineno int) error {
 	line, e := ParseLine(s)
 	if e != nil {
