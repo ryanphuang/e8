@@ -7,13 +7,28 @@ import (
 	"strings"
 )
 
-func trimLine(s string) string {
-	i := strings.Index(s, ";")
-	if i >= 0 {
-		s = s[:i]
+func trimEndl(s string) string {
+	for {
+		n := len(s)
+		if n > 0 && s[n-1] == '\n' {
+			s = s[:n-1]
+		} else {
+			break
+		}
 	}
 
-	return trim(s)
+	return s
+}
+
+func trimLine(s string) (string, string) {
+	i := strings.Index(s, ";")
+	var c string
+	if i >= 0 {
+		s = s[:i]
+		c = trimEndl(s[i:])
+	}
+
+	return trim(s), c
 }
 
 type Assembler struct {
@@ -51,7 +66,7 @@ func (self *Assembler) Assemble() error {
 	for scanner.Scan() {
 		lineno++
 		line := scanner.Text()
-		line = trimLine(line)
+		line, _ = trimLine(line) // TODO: record comments for fmt tools
 		if line == "" {
 			continue
 		}

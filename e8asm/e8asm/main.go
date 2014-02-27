@@ -13,10 +13,11 @@ import (
 )
 
 var (
-	stepLog = flag.Bool("l", false, "log every entry")
-	stdout  = flag.String("o", "", "stdout file")
-	regdmp  = flag.String("d", "", "register result dump")
-	quiet   = flag.Bool("q", false, "hide stats")
+	stepLog  = flag.Bool("l", false, "log every entry")
+	stdout   = flag.String("o", "", "stdout file")
+	regdmp   = flag.String("d", "", "register result dump")
+	quiet    = flag.Bool("q", false, "hide stats")
+	maxCycle = flag.Int("n", 0, "max cycles")
 )
 
 func err(cond bool, e interface{}) {
@@ -81,9 +82,21 @@ func main() {
 	}
 	core.SetPC(mem.PageStart(2))
 
-	cycles := uint32(0)
+	cycles := 0
+	max := *maxCycle
 	for !core.Halted() {
-		cycles += core.Run(1000)
+		run := 1000
+		if max > 0 {
+			run = max - cycles
+			if run > 1000 {
+				run = 1000
+			}
+		}
+
+		cycles += core.Run(run)
+		if max > 0 && cycles >= max {
+			break
+		}
 	}
 
 	if !*quiet {

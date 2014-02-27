@@ -59,8 +59,8 @@ func (self *Core) Step() {
 	self.sys.FlushStdout(self.Stdout)
 }
 
-func (self *Core) Run(n uint32) uint32 {
-	i := uint32(0)
+func (self *Core) Run(n int) int {
+	i := 0
 	for i < n {
 		self.Step()
 		i++
