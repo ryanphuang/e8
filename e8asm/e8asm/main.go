@@ -24,7 +24,10 @@ func err(cond bool, e interface{}) {
 	if !cond {
 		return
 	}
-	fmt.Fprintln(os.Stderr, "error:", e)
+	s := fmt.Sprintf("%v", e)
+	if s != "" {
+		fmt.Fprintln(os.Stderr, "error: ", s)
+	}
 	os.Exit(1)
 }
 
@@ -49,17 +52,21 @@ func main() {
 	err(len(args) == 0, "no input file")
 	err(len(args) > 1, "too many input files")
 
+	fname := args[0]
 	fin, e := os.Open(args[0])
 	err(e != nil, e)
 	defer fin.Close()
 
 	asmBuf := new(bytes.Buffer)
 	asm := &e8asm.Assembler{
-		In:  fin,
-		Out: asmBuf,
+		In:       fin,
+		Out:      asmBuf,
+		Filename: fname,
 	}
 	e = asm.Assemble()
-	err(e != nil, e)
+	// assembler will print the errors it self
+	// so we only need to exit here
+	err(e != nil, "")
 
 	imgBuf := new(bytes.Buffer)
 	e = makeImage(asmBuf.Bytes(), imgBuf)

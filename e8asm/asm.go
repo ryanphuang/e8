@@ -74,13 +74,13 @@ func (self *Assembler) Assemble() error {
 		if strings.HasSuffix(line, ":") {
 			e := sec.Label(line)
 			if e != nil {
-				fmt.Printf("%d: %v\n", lineno, e)
+				fmt.Printf("%s:%d: %v\n", self.Filename, lineno, e)
 				lastError = e
 			}
 		} else {
 			e := sec.Line(line, lineno)
 			if e != nil {
-				fmt.Printf("%d: %v\n", lineno, e)
+				fmt.Printf("%s:%d: %v\n", self.Filename, lineno, e)
 				lastError = e
 			}
 		}
