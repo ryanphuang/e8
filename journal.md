@@ -1,4 +1,4 @@
-### 2014.2.26   
+**2014.2.26**
 
 Have a simple working assembler. TODO: add some constants, and string decl. like:
 
