@@ -30,3 +30,10 @@
 - Ideally, all the modules and interfaces could be easily reused, since they
   would likely be small, and hence easy for human to read, understand, modify
   and maintain.
+
+**TODO**
+
+- Refactor the instruction assembly parsing and formatting into a separate package.
+- Multi-section support in assembly.
+- Const immediates support in assembly.
+- Data section support in assembly.
