@@ -1,6 +1,6 @@
 **Road Plan**
 
-- Build a MISP-like very simple virtual machine
+- Build a MIPS-like very simple virtual machine
 - Build an assembler
 - Build a compiler for a Go-like language
 - Reimplement all the above in Javascript
