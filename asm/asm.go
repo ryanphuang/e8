@@ -6,8 +6,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/h8liu/e8/asm/locator"
-	"github.com/h8liu/e8/asm/section"
+	"github.com/h8liu/e8/asm/program"
 )
 
 func trim(s string) string { return strings.TrimSpace(s) }
@@ -40,32 +39,13 @@ type Assembler struct {
 	In       io.Reader
 	Out      io.Writer
 	Filename string
-
-	sections   []*section.Section
-	sectionMap map[string]*section.Section
-}
-
-var _ locator.Locator = new(Assembler)
-
-func (self *Assembler) Locate(s string) (uint32, bool) {
-	sec := self.sectionMap[s]
-	if sec == nil {
-		return 0, false
-	}
-
-	return sec.Start, true
-}
-
-func (self *Assembler) LocateData(s string) (uint32, bool) {
-	panic("todo")
 }
 
 func (self *Assembler) Assemble() error {
-	self.sections = make([]*section.Section, 0, 1024)
-	self.sectionMap = make(map[string]*section.Section)
+	prog := program.New()
 
 	scanner := bufio.NewScanner(self.In)
-	sec := section.New("")
+	sec := prog.NewSection("")
 	lineNo := 0
 	var lastError error
 	for scanner.Scan() {
@@ -76,7 +56,9 @@ func (self *Assembler) Assemble() error {
 			continue
 		}
 
-		if strings.HasSuffix(line, ":") {
+		if strings.HasPrefix(line, ".") {
+			// TODO: process commands
+		} else if strings.HasSuffix(line, ":") {
 			e := sec.AddLabel(line)
 			if e != nil {
 				fmt.Printf("%s:%d: %v\n", self.Filename, lineNo, e)
@@ -99,7 +81,7 @@ func (self *Assembler) Assemble() error {
 		return scanner.Err()
 	}
 
-	sec.FillLabels(self, nil)
+	sec.FillLabels(prog, nil)
 
 	e := sec.CompileTo(self.Out)
 	if e != nil {
