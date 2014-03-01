@@ -2,9 +2,6 @@ package asm
 
 import (
 	"fmt"
-	"math"
-	"strconv"
-	"strings"
 
 	"github.com/h8liu/e8/istr"
 	"github.com/h8liu/e8/vm/inst"
@@ -22,14 +19,8 @@ func newLine(in inst.Inst) *Line {
 	return ret
 }
 
-func (self *Line) IsJump() bool {
-	return self.in.Op() == inst.OpJ
-}
-
-func (self *Line) Op() uint8 {
-	return self.in.Op()
-}
-
+func (self *Line) Op() uint8    { return self.in.Op() }
+func (self *Line) IsJump() bool { return self.in.Op() == inst.OpJ }
 func (self *Line) IsBranch() bool {
 	op := self.in.Op()
 	return op == inst.OpBne || op == inst.OpBeq
@@ -52,36 +43,6 @@ func (self *Line) String() string {
 	}
 
 	return istr.String(self.in)
-}
-
-func lef(s string, args ...interface{}) (*Line, error) {
-	return nil, fmt.Errorf(s, args...)
-}
-
-func ef(s string, args ...interface{}) error {
-	return fmt.Errorf(s, args...)
-}
-
-func trim(s string) string  { return strings.TrimSpace(s) }
-func lower(s string) string { return strings.ToLower(s) }
-func fields(args string) []string {
-	ret := strings.Split(args, ",")
-	for i, s := range ret {
-		ret[i] = trim(s)
-	}
-	return ret
-}
-
-func opSplit(s string) (op, args string) {
-	firstSpace := strings.IndexAny(s, " \t")
-	if firstSpace < 0 {
-		op = s
-	} else {
-		op = s[:firstSpace]
-		args = trim(s[firstSpace:])
-	}
-
-	return
 }
 
 var (
@@ -143,6 +104,20 @@ var (
 		"bne": inst.OpBne,
 		"beq": inst.OpBeq,
 	}
+
+	parseDispatch = []*struct {
+		ops map[string]uint8
+		fn  func(uint8, string) (*Line, error)
+	}{
+		{bInsts, bLine},
+		{i3sInsts, i3sLine},
+		{i3uInsts, i3uLine},
+		{i3aInsts, i3aLine},
+		{i2Insts, i2Line},
+		{r3Insts, r3Line},
+		{r3rInsts, r3rLine},
+		{r3sInsts, r3sLine},
+	}
 )
 
 func ParseLine(s string) (*Line, error) {
@@ -152,122 +127,15 @@ func ParseLine(s string) (*Line, error) {
 
 	if op == "j" {
 		return jLine(inst.OpJ, args)
-	} else if code, found := bInsts[op]; found {
-		return bLine(code, args)
-	} else if code, found := i3sInsts[op]; found {
-		return i3sLine(code, args)
-	} else if code, found := i3uInsts[op]; found {
-		return i3uLine(code, args)
-	} else if code, found := i3aInsts[op]; found {
-		return i3aLine(code, args)
-	} else if code, found := i2Insts[op]; found {
-		return i2Line(code, args)
-	} else if code, found := r3Insts[op]; found {
-		return r3Line(code, args)
-	} else if code, found := r3rInsts[op]; found {
-		return r3rLine(code, args)
-	} else if code, found := r3sInsts[op]; found {
-		return r3sLine(code, args)
+	}
+
+	for _, p := range parseDispatch {
+		if code, found := p.ops[op]; found {
+			return p.fn(code, args)
+		}
 	}
 
 	return nil, fmt.Errorf("invalid op")
-}
-
-func isIdent(s string) bool {
-	for i, c := range s {
-		if c == '_' {
-			continue
-		}
-		if c >= 'a' && c <= 'z' {
-			continue
-		}
-		if c >= 'A' && c <= 'Z' {
-			continue
-		}
-		if c >= '0' && c <= '9' {
-			if i == 0 {
-				return false
-			}
-			continue
-		}
-		return false
-	}
-
-	return true
-}
-
-func parseInt(s string) (int64, error) {
-	return strconv.ParseInt(s, 0, 32)
-}
-
-func parseReg(s string) (uint8, bool) {
-	if len(s) < 2 {
-		return 0, false
-	}
-	s = lower(s)
-
-	if s == "pc" {
-		return inst.RegPC, true
-	}
-
-	if s[0] != '$' && s[0] != 'r' {
-		return 0, false
-	}
-
-	n, e := parseInt(s[1:])
-	if e != nil {
-		return 0, false
-	}
-	if n < 0 {
-		return 0, false
-	}
-	if n >= inst.Nreg {
-		return 0, false
-	}
-
-	return uint8(n), true
-}
-
-func parseShamt(s string) (uint8, bool) {
-	n, e := parseInt(s)
-	if e != nil {
-		return 0, false
-	}
-	if n < 0 {
-		return 0, false
-	}
-	if n >= 32 {
-		return 0, false
-	}
-	return uint8(n), true
-}
-
-func parseIms(s string) (uint16, bool) {
-	n, e := parseInt(s)
-	if e != nil {
-		return 0, false
-	}
-	if n < math.MinInt16 {
-		return 0, false
-	}
-	if n > math.MaxInt16 {
-		return 0, false
-	}
-	return uint16(int16(n)), true
-}
-
-func parseImu(s string) (uint16, bool) {
-	n, e := parseInt(s)
-	if e != nil {
-		return 0, false
-	}
-	if n < 0 {
-		return 0, false
-	}
-	if n > math.MaxUint16 {
-		return 0, false
-	}
-	return uint16(n), true
 }
 
 func jLine(code uint8, args string) (*Line, error) {
@@ -353,35 +221,6 @@ func i3uLine(code uint8, args string) (*Line, error) {
 
 	ret := newLine(inst.Iinst(code, rs, rt, im))
 	return ret, nil
-}
-
-func parseAddr(s string) (im uint16, rs uint8, valid bool) {
-	ns := len(s)
-	if s[ns-1] != ')' {
-		// bare signed im
-		im, valid = parseIms(s)
-		if !valid {
-			return 0, 0, false
-		}
-		return im, 0, true
-	}
-	sep := strings.Index(s, "(")
-	if sep < 0 {
-		return 0, 0, false
-	}
-
-	imStr := s[:sep]
-	regStr := s[sep+1 : ns-1]
-	im, valid = parseIms(imStr)
-	if !valid {
-		return 0, 0, false
-	}
-	rs, valid = parseReg(regStr)
-	if !valid {
-		return 0, 0, false
-	}
-
-	return im, rs, true
 }
 
 func i3aLine(code uint8, args string) (*Line, error) {
