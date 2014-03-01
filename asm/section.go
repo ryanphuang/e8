@@ -6,13 +6,14 @@ import (
 	"math"
 	"strings"
 
-	"github.com/h8liu/e8/vm/inst"
+	"github.com/h8liu/e8/asm/line"
+	"github.com/h8liu/e8/asm/parse"
 )
 
 type Section struct {
 	Name     string
 	Start    uint32
-	lines    []*Line
+	lines    []*line.Line
 	labelMap map[string]*Label
 	labels   []*Label
 }
@@ -20,7 +21,7 @@ type Section struct {
 func NewSection(name string) *Section {
 	ret := new(Section)
 	ret.Name = name
-	ret.lines = make([]*Line, 0, 1024)
+	ret.lines = make([]*line.Line, 0, 1024)
 	ret.labelMap = make(map[string]*Label)
 	ret.labels = make([]*Label, 0, 1024)
 	return ret
@@ -29,12 +30,12 @@ func NewSection(name string) *Section {
 func (self *Section) Nline() int   { return len(self.lines) }
 func (self *Section) Size() uint32 { return uint32(self.Nline() << 2) }
 
-func (self *Section) Line(s string, lineno int) error {
-	line, e := ParseLine(s)
+func (self *Section) Line(s string, lineNo int) error {
+	line, e := line.ParseLine(s)
 	if e != nil {
 		return e
 	}
-	line.lineno = lineno
+	line.LineNo = lineNo
 
 	self.lines = append(self.lines, line)
 	return nil
@@ -46,7 +47,7 @@ func (self *Section) Label(s string) error {
 	}
 
 	s = s[:len(s)-1]
-	if !isIdent(s) {
+	if !parse.IsIdent(s) {
 		return ef("not a valid label")
 	}
 
@@ -101,7 +102,7 @@ func (self *Section) CompileTo(out io.Writer) error {
 	buf := make([]byte, 4)
 
 	for _, line := range self.lines {
-		pu32(buf, line.in.U32())
+		pu32(buf, line.U32())
 		_, e := out.Write(buf)
 		if e != nil {
 			return e
@@ -115,9 +116,10 @@ func (self *Section) FillLabels(locator Locator, err io.Writer) {
 	for i, line := range self.lines {
 		curPos := self.Start + uint32(i<<2) + 4
 		if line.IsJump() {
-			pos, found := self.Locate(line.label)
+			label := line.Label()
+			pos, found := self.Locate(label)
 			if !found {
-				pos, found = locator.Locate(line.label)
+				pos, found = locator.Locate(label)
 			}
 			offset := int32(pos-curPos) >> 2
 			if offset > (0x1<<25)-1 {
@@ -126,11 +128,12 @@ func (self *Section) FillLabels(locator Locator, err io.Writer) {
 				panic("jump out of range") // TODO
 			}
 
-			line.in = inst.Jinst(offset)
+			line.J(offset)
 		} else if line.IsBranch() {
-			pos, found := self.Locate(line.label)
+			label := line.Label()
+			pos, found := self.Locate(label)
 			if !found {
-				pos, found = locator.Locate(line.label)
+				pos, found = locator.Locate(label)
 			}
 			offset := int32(pos-curPos) >> 2
 			if offset > math.MaxInt16 {
@@ -139,10 +142,7 @@ func (self *Section) FillLabels(locator Locator, err io.Writer) {
 				panic("branch out of range") // TODO
 			}
 
-			_in := line.in.U32()
-			_in &= 0xffff0000
-			_in |= uint32(uint16(int16(offset)))
-			line.in = inst.Inst(_in)
+			line.Ims(int16(offset))
 		}
 	}
 }

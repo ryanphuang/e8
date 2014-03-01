@@ -3,6 +3,9 @@
 all:
 	go install ./...
 
+rall:
+	go build -a ./...
+
 fmt:
 	gofmt -s -w -l .
 

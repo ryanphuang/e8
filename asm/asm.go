@@ -7,6 +7,8 @@ import (
 	"strings"
 )
 
+func trim(s string) string { return strings.TrimSpace(s) }
+
 func trimEndl(s string) string {
 	for {
 		n := len(s)

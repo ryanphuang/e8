@@ -1,12 +1,17 @@
-package asm
+package line
 
 import (
+	"fmt"
 	"math"
 	"strconv"
 	"strings"
 
 	"github.com/h8liu/e8/vm/inst"
 )
+
+func lef(s string, args ...interface{}) (*Line, error) {
+	return nil, fmt.Errorf(s, args...)
+}
 
 func trim(s string) string  { return strings.TrimSpace(s) }
 func lower(s string) string { return strings.ToLower(s) }
@@ -132,27 +137,4 @@ func parseAddr(s string) (im uint16, rs uint8, valid bool) {
 	}
 
 	return im, rs, true
-}
-
-func isIdent(s string) bool {
-	for i, c := range s {
-		if c == '_' {
-			continue
-		}
-		if c >= 'a' && c <= 'z' {
-			continue
-		}
-		if c >= 'A' && c <= 'Z' {
-			continue
-		}
-		if c >= '0' && c <= '9' {
-			if i == 0 {
-				return false
-			}
-			continue
-		}
-		return false
-	}
-
-	return true
 }

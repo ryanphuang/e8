@@ -1,8 +1,9 @@
-package asm
+package line
 
 import (
 	"fmt"
 
+	"github.com/h8liu/e8/asm/parse"
 	"github.com/h8liu/e8/istr"
 	"github.com/h8liu/e8/vm/inst"
 )
@@ -10,17 +11,27 @@ import (
 type Line struct {
 	in     inst.Inst
 	label  string
-	lineno int
+	LineNo int
 }
 
-func newLine(in inst.Inst) *Line {
+func NewLine(in inst.Inst) *Line {
 	ret := new(Line)
 	ret.in = in
 	return ret
 }
 
-func (self *Line) Op() uint8    { return self.in.Op() }
-func (self *Line) IsJump() bool { return self.in.Op() == inst.OpJ }
+func (self *Line) Set(in inst.Inst) { self.in = in }
+func (self *Line) J(addr int32)     { self.in = inst.Jinst(addr) }
+func (self *Line) Ims(im int16) {
+	in := self.in.U32() & 0xffff0000
+	in |= uint32(uint16(im))
+	self.in = inst.Inst(in)
+}
+
+func (self *Line) U32() uint32   { return self.in.U32() }
+func (self *Line) Label() string { return self.label }
+func (self *Line) Op() uint8     { return self.in.Op() }
+func (self *Line) IsJump() bool  { return self.in.Op() == inst.OpJ }
 func (self *Line) IsBranch() bool {
 	op := self.in.Op()
 	return op == inst.OpBne || op == inst.OpBeq
@@ -87,11 +98,11 @@ func ParseLine(s string) (*Line, error) {
 }
 
 func jLine(_, args string) (*Line, error) {
-	if !isIdent(args) {
+	if !parse.IsIdent(args) {
 		return lef("invalid label")
 	}
 
-	ret := newLine(inst.Jinst(0))
+	ret := NewLine(inst.Jinst(0))
 	ret.label = args
 
 	return ret, nil
@@ -115,11 +126,11 @@ func bLine(c, args string) (*Line, error) {
 	}
 
 	label := fs[2]
-	if !isIdent(label) {
+	if !parse.IsIdent(label) {
 		return lef("third field is not a label")
 	}
 
-	ret := newLine(inst.Iinst(code, rs, rt, 0))
+	ret := NewLine(inst.Iinst(code, rs, rt, 0))
 	ret.label = label
 
 	return ret, nil
@@ -147,7 +158,7 @@ func i3sLine(c, args string) (*Line, error) {
 		return lef("third field not a signed immediate")
 	}
 
-	ret := newLine(inst.Iinst(code, rs, rt, im))
+	ret := NewLine(inst.Iinst(code, rs, rt, im))
 	return ret, nil
 }
 
@@ -173,7 +184,7 @@ func i3uLine(c, args string) (*Line, error) {
 		return lef("third field not an unsigned immediate")
 	}
 
-	ret := newLine(inst.Iinst(code, rs, rt, im))
+	ret := NewLine(inst.Iinst(code, rs, rt, im))
 	return ret, nil
 }
 
@@ -195,7 +206,7 @@ func i3aLine(c, args string) (*Line, error) {
 		return lef("second field not an address")
 	}
 
-	ret := newLine(inst.Iinst(code, rs, rt, im))
+	ret := NewLine(inst.Iinst(code, rs, rt, im))
 	return ret, nil
 }
 
@@ -217,7 +228,7 @@ func i2Line(c, args string) (*Line, error) {
 		return lef("second field not a signed immediate")
 	}
 
-	ret := newLine(inst.Iinst(code, 0, rt, im))
+	ret := NewLine(inst.Iinst(code, 0, rt, im))
 	return ret, nil
 }
 
@@ -242,7 +253,7 @@ func r3Line(c, args string) (*Line, error) {
 		return lef("third field not register")
 	}
 
-	ret := newLine(inst.Rinst(rs, rt, rd, code))
+	ret := NewLine(inst.Rinst(rs, rt, rd, code))
 	return ret, nil
 }
 
@@ -267,7 +278,7 @@ func r3rLine(c, args string) (*Line, error) {
 		return lef("third field not register")
 	}
 
-	ret := newLine(inst.Rinst(rs, rt, rd, code))
+	ret := NewLine(inst.Rinst(rs, rt, rd, code))
 	return ret, nil
 }
 
@@ -292,6 +303,6 @@ func r3sLine(c, args string) (*Line, error) {
 		return lef("third field not shamt")
 	}
 
-	ret := newLine(inst.RinstShamt(0, rt, rd, shamt, code))
+	ret := NewLine(inst.RinstShamt(0, rt, rd, shamt, code))
 	return ret, nil
 }
