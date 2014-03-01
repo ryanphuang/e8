@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/h8liu/e8/istr"
 	"github.com/h8liu/e8/vm/inst"
 )
 
@@ -50,7 +51,7 @@ func (self *Line) String() string {
 		}
 	}
 
-	return self.in.String()
+	return istr.String(self.in)
 }
 
 func lef(s string, args ...interface{}) (*Line, error) {

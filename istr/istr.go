@@ -11,129 +11,77 @@ func String(i Inst) string {
 		return "noop"
 	}
 
-	op := uint8(i >> 26)
+	op := i.Op()
 
 	if op == OpRinst {
-		rs := uint8(i>>21) & 0x1f
-		rt := uint8(i>>16) & 0x1f
-		rd := uint8(i>>11) & 0x1f
-		shamt := uint8(i>>6) & 0x1f
-		funct := uint8(i) & 0x3f
-		r3 := func(op string) string {
-			return fmt.Sprintf("%s $%d, $%d, $%d", op, rd, rs, rt)
+		rs := i.Rs()
+		rt := i.Rt()
+		rd := i.Rd()
+		shamt := i.Sh()
+		funct := i.Fn()
+		name := FunctName(funct)
+
+		r3 := func() string {
+			return fmt.Sprintf("%s $%d, $%d, $%d", name, rd, rs, rt)
 		}
-		r3r := func(op string) string {
-			return fmt.Sprintf("%s $%d, $%d, $%d", op, rd, rt, rs)
+		r3r := func() string {
+			return fmt.Sprintf("%s $%d, $%d, $%d", name, rd, rt, rs)
 		}
-		r3s := func(op string) string {
-			return fmt.Sprintf("%s $%d, $%d, $d", op, rd, rt, shamt)
+		r3s := func() string {
+			return fmt.Sprintf("%s $%d, $%d, $d", name, rd, rt, shamt)
 		}
 
 		switch funct {
-		case FnAdd:
-			return r3("add")
-		case FnSub:
-			return r3("sub")
-		case FnAnd:
-			return r3("and")
-		case FnOr:
-			return r3("or")
-		case FnXor:
-			return r3("xor")
-		case FnNor:
-			return r3("nor")
-		case FnSlt:
-			return r3("slt")
-
-		case FnMul:
-			return r3("mul")
-		case FnMulu:
-			return r3("mulu")
-		case FnDiv:
-			return r3("div")
-		case FnDivu:
-			return r3("divu")
-		case FnMod:
-			return r3("mod")
-		case FnModu:
-			return r3("modu")
-
-		case FnSll:
-			return r3s("sll")
-		case FnSrl:
-			return r3s("srl")
-		case FnSra:
-			return r3s("sra")
-		case FnSllv:
-			return r3r("sllv")
-		case FnSrlv:
-			return r3r("srlv")
-		case FnSrav:
-			return r3r("srav")
-
+		case FnAdd, FnSub, FnAnd, FnOr, FnXor, FnNor, FnSlt:
+			fallthrough
+		case FnMul, FnMulu, FnDiv, FnDivu, FnMod, FnModu:
+			return r3()
+		case FnSll, FnSrl, FnSra:
+			return r3s()
+		case FnSllv, FnSrlv, FnSrav:
+			return r3r()
 		default:
 			return fmt.Sprintf("noop-r%d", funct)
 		}
+
 	} else if op == OpJ {
-		im := int32(i<<6) >> 6
-		return fmt.Sprintf("j %d", im)
+		return fmt.Sprintf("j %d", i.Ad())
 	} else {
-		rs := uint8(i>>21) & 0x1f
-		rt := uint8(i>>16) & 0x1f
-		im := uint16(i)
-		ims := int16(im)
+		rs := i.Rs()
+		rt := i.Rt()
+		im := i.Imu()
+		ims := i.Ims()
+		name := OpName(op)
 
-		i2 := func(op string) string {
-			return fmt.Sprintf("%s $%d, $d", op, rt, im)
+		i2 := func() string {
+			return fmt.Sprintf("%s $%d, $d", name, rt, im)
 		}
-
-		i3sr := func(op string) string {
-			return fmt.Sprintf("%s $%d, $%d, %d", op, rs, rt, ims)
+		i3sr := func() string {
+			return fmt.Sprintf("%s $%d, $%d, %d", name, rs, rt, ims)
 		}
-
-		i3s := func(op string) string {
-			return fmt.Sprintf("%s $%d, $%d, %d", op, rt, rs, ims)
+		i3s := func() string {
+			return fmt.Sprintf("%s $%d, $%d, %d", name, rt, rs, ims)
 		}
-
-		i3 := func(op string) string {
-			return fmt.Sprintf("%s $%d, $%d, %d", op, rt, rs, im)
+		i3 := func() string {
+			return fmt.Sprintf("%s $%d, $%d, %d", name, rt, rs, im)
 		}
-
-		i3a := func(op string) string {
-			return fmt.Sprintf("%s $%d, %d($%d)", op, rt, ims, rs)
+		i3a := func() string {
+			return fmt.Sprintf("%s $%d, %d($%d)", name, rt, ims, rs)
 		}
 
 		switch op {
-		case OpBeq:
-			return i3sr("beq")
-		case OpBne:
-			return i3sr("bne")
-		case OpAddi:
-			return i3("addi")
+		case OpBeq, OpBne:
+			return i3sr()
+		case OpAddi, OpAndi, OpOri:
+			return i3()
 		case OpSlti:
-			return i3s("slti")
-		case OpAndi:
-			return i3("andi")
-		case OpOri:
-			return i3("ori")
+			return i3s()
 		case OpLui:
-			return i2("lui")
-		case OpLw:
-			return i3a("lw")
-		case OpLhs:
-			return i3a("lhs")
-		case OpLhu:
-			return i3a("lhu")
-		case OpLbs:
-			return i3a("lbs")
-		case OpLbu:
-			return i3a("lbu")
-		case OpSw:
-			return i3a("sw")
-		case OpSh:
-			return i3a("sh")
-		case OpSb:
-			return i3a("sb")
+			return i2()
+		case OpLw, OpLhs, OpLhu, OpLbs, OpLbu:
+			fallthrough
+		case OpSw, OpSh, OpSb:
+			return i3a()
 		}
 	}
 
