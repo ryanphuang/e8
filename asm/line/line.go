@@ -64,13 +64,13 @@ var dispatch = func() map[string]string {
 		}
 	}
 
-	bind(args.Compile("rd, rs, rt"), 
+	bind(args.Compile("rd, rs, rt"),
 		"add", "sub", "and", "or", "xor", "nor", "slt",
 		"mul", "mulu", "div", "divu", "mod", "modu",
 	)
 	bind(args.Compile("rd, rt, rs"), "sllv", "srlv", "srav")
 	bind(args.Compile("rd, rt, shamt"), "sll", "srl", "sra")
-	bind(args.Compile("rt, addr"), 
+	bind(args.Compile("rt, addr"),
 		"lw", "lhs", "lhu", "lbs", "lbu",
 		"sw", "sh", "sb",
 	)

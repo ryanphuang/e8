@@ -5,14 +5,14 @@ import (
 	"strings"
 )
 
-var fieldNames = map[string]rune {
-	"rs": 's',
-	"rt": 't',
-	"rd": 'd',
+var fieldNames = map[string]rune{
+	"rs":    's',
+	"rt":    't',
+	"rd":    'd',
 	"shamt": 'S',
-	"imu": 'u',
-	"ims": 'i',
-	"addr": 'a',
+	"imu":   'u',
+	"ims":   'i',
+	"addr":  'a',
 	"label": 'l',
 }
 
