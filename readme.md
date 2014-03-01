@@ -33,7 +33,6 @@
 
 **TODO**
 
-- Multi-section support in assembly.
 - Const immediates support in assembly.
 - Data section support in assembly.
 - Assemble a project of multiple files.
