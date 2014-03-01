@@ -45,100 +45,48 @@ func (self *Line) String() string {
 	return istr.String(self.in)
 }
 
-var (
-	r3Insts = map[string]uint8{
-		"add": inst.FnAdd,
-		"sub": inst.FnSub,
-		"and": inst.FnAnd,
-		"or":  inst.FnOr,
-		"xor": inst.FnXor,
-		"nor": inst.FnXor,
-		"slt": inst.FnSlt,
+type parseFunc func(c, args string) (*Line, error)
 
-		"mul":  inst.FnMul,
-		"mulu": inst.FnMulu,
-		"div":  inst.FnDiv,
-		"divu": inst.FnDivu,
-		"mod":  inst.FnMod,
-		"modu": inst.FnModu,
+var dispatch = func() map[string]parseFunc {
+	ret := make(map[string]parseFunc)
+	bind := func(f parseFunc, cs ...string) {
+		for _, c := range cs {
+			ret[c] = f
+		}
 	}
 
-	r3rInsts = map[string]uint8{
-		"sllv": inst.FnSllv,
-		"srlv": inst.FnSrlv,
-		"srav": inst.FnSrav,
-	}
+	bind(r3Line, "add", "sub", "and", "or", "xor", "nor", "slt")
+	bind(r3Line, "mul", "mulu", "div", "divu", "mod", "modu")
+	bind(r3rLine, "sllv", "srlv", "srav")
+	bind(r3sLine, "sll", "srl", "sra")
 
-	r3sInsts = map[string]uint8{
-		"sll": inst.FnSll,
-		"srl": inst.FnSrl,
-		"sra": inst.FnSra,
-	}
+	bind(i3aLine, "lw", "lhs", "lhu", "lbs", "lbu")
+	bind(i3aLine, "sw", "sh", "sb")
+	bind(i3sLine, "addi", "slti")
+	bind(i3uLine, "andi", "ori")
+	bind(i2Line, "lui")
 
-	i3aInsts = map[string]uint8{
-		"lw":  inst.OpLw,
-		"lhs": inst.OpLhs,
-		"lhu": inst.OpLhu,
-		"lbs": inst.OpLbs,
-		"lbu": inst.OpLbu,
-		"sw":  inst.OpSw,
-		"sh":  inst.OpSh,
-		"sb":  inst.OpSb,
-	}
+	bind(bLine, "bne", "beq")
 
-	i3sInsts = map[string]uint8{
-		"addi": inst.OpAddi,
-		"slti": inst.OpSlti,
-	}
+	bind(jLine, "j")
 
-	i3uInsts = map[string]uint8{
-		"andi": inst.OpAndi,
-		"ori":  inst.OpOri,
-	}
-
-	i2Insts = map[string]uint8{
-		"lui": inst.OpLui,
-	}
-
-	bInsts = map[string]uint8{
-		"bne": inst.OpBne,
-		"beq": inst.OpBeq,
-	}
-
-	parseDispatch = []*struct {
-		ops map[string]uint8
-		fn  func(uint8, string) (*Line, error)
-	}{
-		{bInsts, bLine},
-		{i3sInsts, i3sLine},
-		{i3uInsts, i3uLine},
-		{i3aInsts, i3aLine},
-		{i2Insts, i2Line},
-		{r3Insts, r3Line},
-		{r3rInsts, r3rLine},
-		{r3sInsts, r3sLine},
-	}
-)
+	return ret
+}()
 
 func ParseLine(s string) (*Line, error) {
 	s = trim(s)
 	op, args := opSplit(s)
 	op = lower(op)
 
-	if op == "j" {
-		return jLine(inst.OpJ, args)
+	f := dispatch[op]
+	if f == nil {
+		return nil, fmt.Errorf("invalid op")
 	}
 
-	for _, p := range parseDispatch {
-		if code, found := p.ops[op]; found {
-			return p.fn(code, args)
-		}
-	}
-
-	return nil, fmt.Errorf("invalid op")
+	return f(op, args)
 }
 
-func jLine(code uint8, args string) (*Line, error) {
+func jLine(_, args string) (*Line, error) {
 	if !isIdent(args) {
 		return lef("invalid label")
 	}
@@ -149,7 +97,9 @@ func jLine(code uint8, args string) (*Line, error) {
 	return ret, nil
 }
 
-func bLine(code uint8, args string) (*Line, error) {
+func bLine(c, args string) (*Line, error) {
+	code := istr.OpCode(c)
+
 	fs := fields(args)
 	if len(fs) != 3 {
 		return lef("invalid field count")
@@ -175,7 +125,9 @@ func bLine(code uint8, args string) (*Line, error) {
 	return ret, nil
 }
 
-func i3sLine(code uint8, args string) (*Line, error) {
+func i3sLine(c, args string) (*Line, error) {
+	code := istr.OpCode(c)
+
 	fs := fields(args)
 	if len(fs) != 3 {
 		return lef("invalid field count")
@@ -199,7 +151,9 @@ func i3sLine(code uint8, args string) (*Line, error) {
 	return ret, nil
 }
 
-func i3uLine(code uint8, args string) (*Line, error) {
+func i3uLine(c, args string) (*Line, error) {
+	code := istr.OpCode(c)
+
 	fs := fields(args)
 	if len(fs) != 3 {
 		return lef("invalid field count")
@@ -223,7 +177,9 @@ func i3uLine(code uint8, args string) (*Line, error) {
 	return ret, nil
 }
 
-func i3aLine(code uint8, args string) (*Line, error) {
+func i3aLine(c, args string) (*Line, error) {
+	code := istr.OpCode(c)
+
 	fs := fields(args)
 	if len(fs) != 2 {
 		return lef("invalid field count")
@@ -243,7 +199,9 @@ func i3aLine(code uint8, args string) (*Line, error) {
 	return ret, nil
 }
 
-func i2Line(code uint8, args string) (*Line, error) {
+func i2Line(c, args string) (*Line, error) {
+	code := istr.OpCode(c)
+
 	fs := fields(args)
 	if len(fs) != 2 {
 		return lef("invalid field count")
@@ -263,7 +221,9 @@ func i2Line(code uint8, args string) (*Line, error) {
 	return ret, nil
 }
 
-func r3Line(code uint8, args string) (*Line, error) {
+func r3Line(c, args string) (*Line, error) {
+	code := istr.FunctCode(c)
+
 	fs := fields(args)
 	if len(fs) != 3 {
 		return lef("invalid field count")
@@ -286,7 +246,9 @@ func r3Line(code uint8, args string) (*Line, error) {
 	return ret, nil
 }
 
-func r3rLine(code uint8, args string) (*Line, error) {
+func r3rLine(c, args string) (*Line, error) {
+	code := istr.FunctCode(c)
+
 	fs := fields(args)
 	if len(fs) != 3 {
 		return lef("invalid field count")
@@ -309,7 +271,9 @@ func r3rLine(code uint8, args string) (*Line, error) {
 	return ret, nil
 }
 
-func r3sLine(code uint8, args string) (*Line, error) {
+func r3sLine(c, args string) (*Line, error) {
+	code := istr.FunctCode(c)
+
 	fs := fields(args)
 	if len(fs) != 3 {
 		return lef("invalid field count")

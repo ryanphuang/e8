@@ -28,7 +28,7 @@ func String(i Inst) string {
 			return fmt.Sprintf("%s $%d, $%d, $%d", name, rd, rt, rs)
 		}
 		r3s := func() string {
-			return fmt.Sprintf("%s $%d, $%d, $d", name, rd, rt, shamt)
+			return fmt.Sprintf("%s $%d, $%d, $%d", name, rd, rt, shamt)
 		}
 
 		switch funct {
