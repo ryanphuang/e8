@@ -33,7 +33,6 @@
 
 **TODO**
 
-- Refactor the instruction assembly parsing and formatting into a separate package.
 - Multi-section support in assembly.
 - Const immediates support in assembly.
 - Data section support in assembly.
