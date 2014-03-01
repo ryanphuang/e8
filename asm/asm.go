@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"io"
 	"strings"
+
+	"github.com/h8liu/e8/asm/locator"
+	"github.com/h8liu/e8/asm/section"
 )
 
 func trim(s string) string { return strings.TrimSpace(s) }
@@ -38,11 +41,11 @@ type Assembler struct {
 	Out      io.Writer
 	Filename string
 
-	sections   []*section
-	sectionMap map[string]*section
+	sections   []*section.Section
+	sectionMap map[string]*section.Section
 }
 
-var _ Locator = new(Assembler)
+var _ locator.Locator = new(Assembler)
 
 func (self *Assembler) Locate(s string) (uint32, bool) {
 	sec := self.sectionMap[s]
@@ -58,15 +61,15 @@ func (self *Assembler) LocateData(s string) (uint32, bool) {
 }
 
 func (self *Assembler) Assemble() error {
-	self.sections = make([]*section, 0, 1024)
-	self.sectionMap = make(map[string]*section)
+	self.sections = make([]*section.Section, 0, 1024)
+	self.sectionMap = make(map[string]*section.Section)
 
 	scanner := bufio.NewScanner(self.In)
-	sec := newSection("")
-	lineno := 0
+	sec := section.New("")
+	lineNo := 0
 	var lastError error
 	for scanner.Scan() {
-		lineno++
+		lineNo++
 		line := scanner.Text()
 		line, _ = trimLine(line) // TODO: record comments for fmt tools
 		if line == "" {
@@ -74,15 +77,15 @@ func (self *Assembler) Assemble() error {
 		}
 
 		if strings.HasSuffix(line, ":") {
-			e := sec.Label(line)
+			e := sec.AddLabel(line)
 			if e != nil {
-				fmt.Printf("%s:%d: %v\n", self.Filename, lineno, e)
+				fmt.Printf("%s:%d: %v\n", self.Filename, lineNo, e)
 				lastError = e
 			}
 		} else {
-			e := sec.Line(line, lineno)
+			e := sec.AddLine(line, lineNo)
 			if e != nil {
-				fmt.Printf("%s:%d: %v\n", self.Filename, lineno, e)
+				fmt.Printf("%s:%d: %v\n", self.Filename, lineNo, e)
 				lastError = e
 			}
 		}

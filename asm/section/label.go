@@ -1,4 +1,4 @@
-package asm
+package section
 
 type label struct {
 	index int
