@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/h8liu/e8/e8asm"
+	"github.com/h8liu/e8/asm"
 	"github.com/h8liu/e8/img"
 	"github.com/h8liu/e8/vm/mem"
 )
@@ -37,7 +37,7 @@ func hello() []byte {
 	`)
 
 	ret := new(bytes.Buffer)
-	asm := &e8asm.Assembler{
+	asm := &asm.Assembler{
 		In:  buf,
 		Out: ret,
 	}
