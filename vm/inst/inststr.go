@@ -1,12 +1,10 @@
-package istr
+package inst
 
 import (
 	"fmt"
-
-	. "github.com/h8liu/e8/vm/inst"
 )
 
-func String(i Inst) string {
+func (i Inst) String() string {
 	if uint32(i) == 0 {
 		return "noop"
 	}

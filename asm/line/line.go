@@ -2,9 +2,9 @@ package line
 
 import (
 	"fmt"
+	"strings"
 
-	"github.com/h8liu/e8/asm/parse"
-	"github.com/h8liu/e8/istr"
+	"github.com/h8liu/e8/asm/argfmt"
 	"github.com/h8liu/e8/vm/inst"
 )
 
@@ -53,256 +53,51 @@ func (self *Line) String() string {
 		}
 	}
 
-	return istr.String(self.in)
+	return self.in.String() // TODO: use your own format
 }
 
-type parseFunc func(c, args string) (*Line, error)
-
-var dispatch = func() map[string]parseFunc {
-	ret := make(map[string]parseFunc)
-	bind := func(f parseFunc, cs ...string) {
+var dispatch = func() map[string]*argfmt.Format {
+	ret := make(map[string]*argfmt.Format)
+	bind := func(f string, cs ...string) {
 		for _, c := range cs {
-			ret[c] = f
+			ret[c] = argfmt.New(f)
 		}
 	}
 
-	bind(r3Line, "add", "sub", "and", "or", "xor", "nor", "slt")
-	bind(r3Line, "mul", "mulu", "div", "divu", "mod", "modu")
-	bind(r3rLine, "sllv", "srlv", "srav")
-	bind(r3sLine, "sll", "srl", "sra")
+	bind("dst", "add", "sub", "and", "or", "xor", "nor", "slt")
+	bind("dst", "mul", "mulu", "div", "divu", "mod", "modu")
+	bind("dts", "sllv", "srlv", "srav")
+	bind("dtS", "sll", "srl", "sra")
 
-	bind(i3aLine, "lw", "lhs", "lhu", "lbs", "lbu")
-	bind(i3aLine, "sw", "sh", "sb")
-	bind(i3sLine, "addi", "slti")
-	bind(i3uLine, "andi", "ori")
-	bind(i2Line, "lui")
+	bind("ta", "lw", "lhs", "lhu", "lbs", "lbu")
+	bind("ta", "sw", "sh", "sb")
+	bind("tsi", "addi", "slti")
+	bind("tsu", "andi", "ori")
+	bind("tu", "lui")
 
-	bind(bLine, "bne", "beq")
-
-	bind(jLine, "j")
+	bind("stl", "bne", "beq")
+	bind("l", "j")
 
 	return ret
 }()
 
 func ParseLine(s string) (*Line, error) {
-	s = trim(s)
+	s = strings.TrimSpace(s)
 	op, args := opSplit(s)
-	op = lower(op)
+	op = strings.ToLower(op)
 
 	f := dispatch[op]
 	if f == nil {
 		return nil, fmt.Errorf("invalid op")
 	}
 
-	return f(op, args)
-}
+	base := uint32(inst.OpCode(op)) << inst.OpShift
+	base |= uint32(inst.FunctCode(op)) & inst.FunctMask
 
-func jLine(_, args string) (*Line, error) {
-	if !parse.IsIdent(args) {
-		return lef("invalid label")
+	in, lab, e := f.Parse(base, args)
+	if e != nil {
+		return nil, e
 	}
 
-	ret := NewLine(inst.Jinst(0))
-	ret.label = args
-
-	return ret, nil
-}
-
-func bLine(c, args string) (*Line, error) {
-	code := istr.OpCode(c)
-
-	fs := fields(args)
-	if len(fs) != 3 {
-		return lef("invalid field count")
-	}
-
-	rs, valid := parseReg(fs[0])
-	if !valid {
-		return lef("first field not register")
-	}
-	rt, valid := parseReg(fs[1])
-	if !valid {
-		return lef("second field not register")
-	}
-
-	label := fs[2]
-	if !parse.IsIdent(label) {
-		return lef("third field is not a label")
-	}
-
-	ret := NewLine(inst.Iinst(code, rs, rt, 0))
-	ret.label = label
-
-	return ret, nil
-}
-
-func i3sLine(c, args string) (*Line, error) {
-	code := istr.OpCode(c)
-
-	fs := fields(args)
-	if len(fs) != 3 {
-		return lef("invalid field count")
-	}
-
-	rt, valid := parseReg(fs[0])
-	if !valid {
-		return lef("first field not register")
-	}
-	rs, valid := parseReg(fs[1])
-	if !valid {
-		return lef("second field not register")
-	}
-
-	im, valid := parseIms(fs[2])
-	if !valid {
-		return lef("third field not a signed immediate")
-	}
-
-	ret := NewLine(inst.Iinst(code, rs, rt, im))
-	return ret, nil
-}
-
-func i3uLine(c, args string) (*Line, error) {
-	code := istr.OpCode(c)
-
-	fs := fields(args)
-	if len(fs) != 3 {
-		return lef("invalid field count")
-	}
-
-	rt, valid := parseReg(fs[0])
-	if !valid {
-		return lef("first field not register")
-	}
-	rs, valid := parseReg(fs[1])
-	if !valid {
-		return lef("second field not register")
-	}
-
-	im, valid := parseImu(fs[2])
-	if !valid {
-		return lef("third field not an unsigned immediate")
-	}
-
-	ret := NewLine(inst.Iinst(code, rs, rt, im))
-	return ret, nil
-}
-
-func i3aLine(c, args string) (*Line, error) {
-	code := istr.OpCode(c)
-
-	fs := fields(args)
-	if len(fs) != 2 {
-		return lef("invalid field count")
-	}
-
-	rt, valid := parseReg(fs[0])
-	if !valid {
-		return lef("first field not register")
-	}
-
-	im, rs, valid := parseAddr(fs[1])
-	if !valid {
-		return lef("second field not an address")
-	}
-
-	ret := NewLine(inst.Iinst(code, rs, rt, im))
-	return ret, nil
-}
-
-func i2Line(c, args string) (*Line, error) {
-	code := istr.OpCode(c)
-
-	fs := fields(args)
-	if len(fs) != 2 {
-		return lef("invalid field count")
-	}
-
-	rt, valid := parseReg(fs[0])
-	if !valid {
-		return lef("first field not register")
-	}
-
-	im, valid := parseIms(fs[2])
-	if !valid {
-		return lef("second field not a signed immediate")
-	}
-
-	ret := NewLine(inst.Iinst(code, 0, rt, im))
-	return ret, nil
-}
-
-func r3Line(c, args string) (*Line, error) {
-	code := istr.FunctCode(c)
-
-	fs := fields(args)
-	if len(fs) != 3 {
-		return lef("invalid field count")
-	}
-
-	rd, valid := parseReg(fs[0])
-	if !valid {
-		return lef("first field not register")
-	}
-	rs, valid := parseReg(fs[1])
-	if !valid {
-		return lef("second field not register")
-	}
-	rt, valid := parseReg(fs[2])
-	if !valid {
-		return lef("third field not register")
-	}
-
-	ret := NewLine(inst.Rinst(rs, rt, rd, code))
-	return ret, nil
-}
-
-func r3rLine(c, args string) (*Line, error) {
-	code := istr.FunctCode(c)
-
-	fs := fields(args)
-	if len(fs) != 3 {
-		return lef("invalid field count")
-	}
-
-	rd, valid := parseReg(fs[0])
-	if !valid {
-		return lef("first field not register")
-	}
-	rt, valid := parseReg(fs[1])
-	if !valid {
-		return lef("second field not register")
-	}
-	rs, valid := parseReg(fs[2])
-	if !valid {
-		return lef("third field not register")
-	}
-
-	ret := NewLine(inst.Rinst(rs, rt, rd, code))
-	return ret, nil
-}
-
-func r3sLine(c, args string) (*Line, error) {
-	code := istr.FunctCode(c)
-
-	fs := fields(args)
-	if len(fs) != 3 {
-		return lef("invalid field count")
-	}
-
-	rd, valid := parseReg(fs[0])
-	if !valid {
-		return lef("first field not register")
-	}
-	rt, valid := parseReg(fs[1])
-	if !valid {
-		return lef("second field not register")
-	}
-	shamt, valid := parseShamt(fs[2])
-	if !valid {
-		return lef("third field not shamt")
-	}
-
-	ret := NewLine(inst.RinstShamt(0, rt, rd, shamt, code))
-	return ret, nil
+	return &Line{inst.Inst(in), lab, 0}, nil
 }

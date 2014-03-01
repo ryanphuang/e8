@@ -1,8 +1,4 @@
-package istr
-
-import (
-	. "github.com/h8liu/e8/vm/inst"
-)
+package inst
 
 type codeMap struct {
 	names map[uint8]string
@@ -65,6 +61,7 @@ var (
 		OpSw:   "sw",
 		OpSh:   "sh",
 		OpSb:   "sb",
+		OpJ:    "j",
 	})
 )
 

@@ -2,6 +2,22 @@ package inst
 
 type Inst uint32
 
+const (
+	OpShift    = 26
+	RsShift    = 21
+	RtShift    = 16
+	RdShift    = 11
+	ShamtShift = 6
+
+	OpMask    = 0x3f << OpShift
+	RsMask    = 0x1f << RsShift
+	RtMask    = 0x1f << RtShift
+	RdMask    = 0x1f << RdShift
+	ShamtMask = 0x1f << ShamtShift
+	FunctMask = 0x3f
+	ImMask    = 0xffff
+)
+
 func (i Inst) U32() uint32 { return uint32(i) }
 func (i Inst) Op() uint8   { return uint8(i >> 26) }
 func (i Inst) Rs() uint8   { return uint8(i>>21) & 0x1f }
@@ -13,6 +29,7 @@ func (i Inst) Ims() int16  { return int16(uint16(i)) }
 func (i Inst) Imu() uint16 { return uint16(i) }
 func (i Inst) Ad() int32   { return int32(i) << 6 >> 6 }
 
+/*
 func (i Inst) SetIms(ims int16) Inst {
 	ret := i & 0xffff0000
 	ret |= Inst(uint16(ims))
@@ -24,6 +41,7 @@ func (i Inst) SetImu(imu uint16) Inst {
 	ret |= Inst(imu)
 	return ret
 }
+*/
 
 type instFunc func(c Core, fields *fields)
 

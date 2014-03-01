@@ -5,7 +5,6 @@ import (
 	"io"
 	"os"
 
-	"github.com/h8liu/e8/istr"
 	"github.com/h8liu/e8/vm/inst"
 	"github.com/h8liu/e8/vm/mem"
 )
@@ -50,10 +49,10 @@ func (self *Core) Step() {
 	self.sys.ClearError()
 
 	pc := self.IncPC()
-	in := inst.Inst(self.Memory.ReadU32(pc))
+	u32 := self.Memory.ReadU32(pc)
+	in := inst.Inst(u32)
 	if self.Log != nil {
-		fmt.Fprintf(self.Log, "%08x: %08x   %s\n",
-			pc, in, istr.String(in))
+		fmt.Fprintf(self.Log, "%08x: %08x   %v\n", pc, u32, in)
 		// self.Registers.PrintTo(self.Log)
 	}
 	self.alu.Inst(self, in)
