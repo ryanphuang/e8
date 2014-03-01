@@ -38,6 +38,7 @@ func trimLine(s string) (string, string) {
 type Assembler struct {
 	In       io.Reader
 	Out      io.Writer
+	Err      io.Writer
 	Filename string
 }
 
@@ -56,9 +57,7 @@ func (self *Assembler) Assemble() error {
 			continue
 		}
 
-		if strings.HasPrefix(line, ".") {
-			// TODO: process commands
-		} else if strings.HasSuffix(line, ":") {
+		if strings.HasSuffix(line, ":") {
 			e := sec.AddLabel(line)
 			if e != nil {
 				fmt.Printf("%s:%d: %v\n", self.Filename, lineNo, e)
@@ -81,9 +80,12 @@ func (self *Assembler) Assemble() error {
 		return scanner.Err()
 	}
 
-	sec.FillLabels(prog, nil)
+	e := prog.FillLabels(self.Err)
+	if e != nil {
+		return e
+	}
 
-	e := sec.CompileTo(self.Out)
+	e = prog.CompileTo(self.Out)
 	if e != nil {
 		return e
 	}

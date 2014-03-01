@@ -92,7 +92,7 @@ func Parse(f, s string, base uint32) (uint32, string, error) {
 			ret |= uint32(uint16(ims))
 			ret |= uint32(rs) << inst.RsShift
 		case 'l':
-			if !parse.IsIdent(arg) {
+			if !parse.IsLabel(arg) {
 				return ef("invalid label")
 			}
 

@@ -12,6 +12,7 @@ type Line struct {
 	in     inst.Inst
 	label  string
 	LineNo int
+	Scope  string
 }
 
 func NewLine(in inst.Inst) *Line {
@@ -28,13 +29,22 @@ func (self *Line) Ims(im int16) {
 	self.in = inst.Inst(in)
 }
 
-func (self *Line) U32() uint32   { return self.in.U32() }
-func (self *Line) Label() string { return self.label }
-func (self *Line) Op() uint8     { return self.in.Op() }
-func (self *Line) IsJump() bool  { return self.in.Op() == inst.OpJ }
+func (self *Line) U32() uint32  { return self.in.U32() }
+func (self *Line) Op() uint8    { return self.in.Op() }
+func (self *Line) IsJump() bool { return self.in.Op() == inst.OpJ }
 func (self *Line) IsBranch() bool {
 	op := self.in.Op()
 	return op == inst.OpBne || op == inst.OpBeq
+}
+
+func (self *Line) Label() string {
+	ret := self.label
+
+	if len(ret) > 0 && ret[0] == '.' {
+		ret = self.Scope + ret
+	}
+
+	return ret
 }
 
 func (self *Line) String() string {
@@ -98,5 +108,10 @@ func Parse(s string) (*Line, error) {
 		return nil, e
 	}
 
-	return &Line{inst.Inst(in), lab, 0}, nil
+	ret := &Line{
+		in:    inst.Inst(in),
+		label: lab,
+	}
+
+	return ret, nil
 }

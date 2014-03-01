@@ -60,7 +60,7 @@ func opModu(c Core, f *fields) {
 	if t == 0 {
 		c.WriteReg(f.rd, 0)
 	} else {
-		c.WriteReg(f.rd, s/t)
+		c.WriteReg(f.rd, s%t)
 	}
 }
 

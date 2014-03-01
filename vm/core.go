@@ -52,7 +52,16 @@ func (self *Core) Step() {
 	u32 := self.Memory.ReadU32(pc)
 	in := inst.Inst(u32)
 	if self.Log != nil {
-		fmt.Fprintf(self.Log, "%08x: %08x   %v\n", pc, u32, in)
+		fmt.Fprintf(self.Log, "%08x: %08x   %v", pc, u32, in)
+		if in.Op() != inst.OpJ {
+			rs := in.Rs()
+			rt := in.Rt()
+			rsv := self.ReadReg(rs)
+			rtv := self.ReadReg(rt)
+			fmt.Fprintf(self.Log, "  ; $%d=%d(%08x) $%d=%d(%08x)",
+				rs, rsv, rsv, rt, rtv, rtv)
+		}
+		fmt.Fprintf(self.Log, "\n")
 		// self.Registers.PrintTo(self.Log)
 	}
 	self.alu.Inst(self, in)

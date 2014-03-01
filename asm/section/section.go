@@ -16,11 +16,12 @@ func ef(s string, args ...interface{}) error {
 }
 
 type Section struct {
-	Name     string
-	Start    uint32
-	lines    []*line.Line
-	labelMap map[string]*label
-	labels   []*label
+	Name      string
+	Start     uint32
+	lines     []*line.Line
+	labelMap  map[string]*label
+	labels    []*label
+	curGlobal string
 }
 
 func New(name string) *Section {
@@ -29,6 +30,7 @@ func New(name string) *Section {
 	ret.lines = make([]*line.Line, 0, 1024)
 	ret.labelMap = make(map[string]*label)
 	ret.labels = make([]*label, 0, 1024)
+
 	return ret
 }
 
@@ -41,6 +43,7 @@ func (self *Section) AddLine(s string, lineNo int) error {
 		return e
 	}
 	line.LineNo = lineNo
+	line.Scope = self.curGlobal
 
 	self.lines = append(self.lines, line)
 	return nil
@@ -51,8 +54,25 @@ func (self *Section) AddLabel(s string) error {
 		s = s[:len(s)-1]
 	}
 
-	if !parse.IsIdent(s) {
-		return ef("not a valid label")
+	if len(s) == 0 {
+		return ef("empty label")
+	}
+
+	if s[0] == '.' {
+		// local label
+		s = s[1:]
+		if !parse.IsIdent(s) {
+			return ef("invalid local label")
+		}
+
+		s = self.curGlobal + "." + s
+	} else {
+		// global label
+		if !parse.IsIdent(s) {
+			return ef("invalid global label")
+		}
+
+		self.curGlobal = s
 	}
 
 	if self.labelMap[s] != nil {
@@ -116,14 +136,14 @@ func (self *Section) CompileTo(out io.Writer) error {
 	return nil
 }
 
-func (self *Section) FillLabels(locator locator.Locator, err io.Writer) {
+func (self *Section) FillLabels(loc locator.Locator, err io.Writer) error {
 	for i, line := range self.lines {
 		curPos := self.Start + uint32(i<<2) + 4
 		if line.IsJump() {
 			label := line.Label()
 			pos, found := self.Locate(label)
 			if !found {
-				pos, found = locator.Locate(label)
+				pos, found = loc.Locate(label)
 			}
 			offset := int32(pos-curPos) >> 2
 			if offset > (0x1<<25)-1 {
@@ -137,7 +157,7 @@ func (self *Section) FillLabels(locator locator.Locator, err io.Writer) {
 			label := line.Label()
 			pos, found := self.Locate(label)
 			if !found {
-				pos, found = locator.Locate(label)
+				pos, found = loc.Locate(label)
 			}
 			offset := int32(pos-curPos) >> 2
 			if offset > math.MaxInt16 {
@@ -149,4 +169,6 @@ func (self *Section) FillLabels(locator locator.Locator, err io.Writer) {
 			line.Ims(int16(offset))
 		}
 	}
+
+	return nil
 }

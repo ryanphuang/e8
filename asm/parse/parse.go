@@ -1,6 +1,14 @@
 package parse
 
+import (
+	"strings"
+)
+
 func IsIdent(s string) bool {
+	if len(s) == 0 {
+		return false
+	}
+
 	for i, c := range s {
 		if c == '_' {
 			continue
@@ -21,4 +29,23 @@ func IsIdent(s string) bool {
 	}
 
 	return true
+}
+
+func IsLabel(s string) bool {
+	if len(s) == 0 {
+		return false
+	}
+
+	if s[0] == '.' && IsIdent(s[1:]) {
+		return true
+	}
+
+	dot := strings.Index(s, ".")
+	if dot < 0 {
+		return IsIdent(s)
+	}
+
+	global := s[:dot]
+	local := s[dot+1:]
+	return IsIdent(global) && IsIdent(local)
 }
