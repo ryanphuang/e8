@@ -1,4 +1,4 @@
-package argfmt
+package args
 
 import (
 	"math"

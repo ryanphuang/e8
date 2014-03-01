@@ -31,7 +31,7 @@ func (self *Section) Nline() int   { return len(self.lines) }
 func (self *Section) Size() uint32 { return uint32(self.Nline() << 2) }
 
 func (self *Section) Line(s string, lineNo int) error {
-	line, e := line.ParseLine(s)
+	line, e := line.Parse(s)
 	if e != nil {
 		return e
 	}

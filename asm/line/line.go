@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/h8liu/e8/asm/argfmt"
+	"github.com/h8liu/e8/asm/args"
 	"github.com/h8liu/e8/vm/inst"
 )
 
@@ -20,8 +20,8 @@ func NewLine(in inst.Inst) *Line {
 	return ret
 }
 
-func (self *Line) Set(in inst.Inst) { self.in = in }
-func (self *Line) J(addr int32)     { self.in = inst.Jinst(addr) }
+// To setup label fields
+func (self *Line) J(addr int32) { self.in = inst.Jinst(addr) }
 func (self *Line) Ims(im int16) {
 	in := self.in.U32() & 0xffff0000
 	in |= uint32(uint16(im))
@@ -56,11 +56,11 @@ func (self *Line) String() string {
 	return self.in.String() // TODO: use your own format
 }
 
-var dispatch = func() map[string]*argfmt.Format {
-	ret := make(map[string]*argfmt.Format)
+var dispatch = func() map[string]string {
+	ret := make(map[string]string)
 	bind := func(f string, cs ...string) {
 		for _, c := range cs {
-			ret[c] = argfmt.New(f)
+			ret[c] = f
 		}
 	}
 
@@ -81,20 +81,20 @@ var dispatch = func() map[string]*argfmt.Format {
 	return ret
 }()
 
-func ParseLine(s string) (*Line, error) {
+func Parse(s string) (*Line, error) {
 	s = strings.TrimSpace(s)
-	op, args := opSplit(s)
+	op, a := opSplit(s)
 	op = strings.ToLower(op)
 
-	f := dispatch[op]
-	if f == nil {
+	f, found := dispatch[op]
+	if !found {
 		return nil, fmt.Errorf("invalid op")
 	}
 
 	base := uint32(inst.OpCode(op)) << inst.OpShift
 	base |= uint32(inst.FunctCode(op)) & inst.FunctMask
 
-	in, lab, e := f.Parse(base, args)
+	in, lab, e := args.Parse(f, a, base)
 	if e != nil {
 		return nil, e
 	}

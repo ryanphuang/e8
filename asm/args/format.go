@@ -1,4 +1,4 @@
-package argfmt
+package args
 
 import (
 	"fmt"
@@ -6,16 +6,6 @@ import (
 	"github.com/h8liu/e8/asm/parse"
 	"github.com/h8liu/e8/vm/inst"
 )
-
-type Format struct {
-	s string
-}
-
-func New(s string) *Format {
-	ret := new(Format)
-	ret.s = s
-	return ret
-}
 
 func ef(s string, args ...interface{}) (uint32, string, error) {
 	return 0, "", fmt.Errorf(s, args...)
@@ -37,17 +27,17 @@ func argName(i int) string {
 	return fmt.Sprintf("arg %d", i+1)
 }
 
-func (self *Format) Parse(base uint32, s string) (uint32, string, error) {
+func Parse(f, s string, base uint32) (uint32, string, error) {
 	args := parseArgs(s)
 
-	if len(args) != len(self.s) {
+	if len(args) != len(f) {
 		return ef("invalid arg count")
 	}
 
 	ret := base
 	label := ""
 
-	for i, r := range self.s {
+	for i, r := range f {
 		arg := args[i]
 
 		switch r {
