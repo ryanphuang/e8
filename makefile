@@ -23,3 +23,6 @@ lc:
 
 doc:
 	godoc -http=:8000
+
+asmt:
+	make -C asm-tests

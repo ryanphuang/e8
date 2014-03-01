@@ -64,19 +64,21 @@ var dispatch = func() map[string]string {
 		}
 	}
 
-	bind("dst", "add", "sub", "and", "or", "xor", "nor", "slt")
-	bind("dst", "mul", "mulu", "div", "divu", "mod", "modu")
-	bind("dts", "sllv", "srlv", "srav")
-	bind("dtS", "sll", "srl", "sra")
-
-	bind("ta", "lw", "lhs", "lhu", "lbs", "lbu")
-	bind("ta", "sw", "sh", "sb")
-	bind("tsi", "addi", "slti")
-	bind("tsu", "andi", "ori")
-	bind("tu", "lui")
-
-	bind("stl", "bne", "beq")
-	bind("l", "j")
+	bind(args.Compile("rd, rs, rt"), 
+		"add", "sub", "and", "or", "xor", "nor", "slt",
+		"mul", "mulu", "div", "divu", "mod", "modu",
+	)
+	bind(args.Compile("rd, rt, rs"), "sllv", "srlv", "srav")
+	bind(args.Compile("rd, rt, shamt"), "sll", "srl", "sra")
+	bind(args.Compile("rt, addr"), 
+		"lw", "lhs", "lhu", "lbs", "lbu",
+		"sw", "sh", "sb",
+	)
+	bind(args.Compile("rt, rs, ims"), "addi", "slti")
+	bind(args.Compile("rt, rs, imu"), "andi", "ori")
+	bind(args.Compile("rt, imu"), "lui")
+	bind(args.Compile("rs, rt, label"), "bne", "beq")
+	bind(args.Compile("label"), "j")
 
 	return ret
 }()
