@@ -58,27 +58,24 @@ func (self *Line) String() string {
 
 var dispatch = func() map[string]string {
 	ret := make(map[string]string)
-	bind := func(f string, cs ...string) {
+	o := func(f string, cs ...string) {
+		f = args.Compile(f)
 		for _, c := range cs {
 			ret[c] = f
 		}
 	}
 
-	bind(args.Compile("rd, rs, rt"),
-		"add", "sub", "and", "or", "xor", "nor", "slt",
-		"mul", "mulu", "div", "divu", "mod", "modu",
-	)
-	bind(args.Compile("rd, rt, rs"), "sllv", "srlv", "srav")
-	bind(args.Compile("rd, rt, shamt"), "sll", "srl", "sra")
-	bind(args.Compile("rt, addr"),
-		"lw", "lhs", "lhu", "lbs", "lbu",
-		"sw", "sh", "sb",
-	)
-	bind(args.Compile("rt, rs, ims"), "addi", "slti")
-	bind(args.Compile("rt, rs, imu"), "andi", "ori")
-	bind(args.Compile("rt, imu"), "lui")
-	bind(args.Compile("rs, rt, label"), "bne", "beq")
-	bind(args.Compile("label"), "j")
+	o("rd, rs, rt", "add", "sub", "and", "or", "xor", "nor", "slt")
+	o("rd, rs, rt", "mul", "mulu", "div", "divu", "mod", "modu")
+	o("rd, rt, rs", "sllv", "srlv", "srav")
+	o("rd, rt, shamt", "sll", "srl", "sra")
+	o("rt, addr", "lw", "lhs", "lhu", "lbs", "lbu")
+	o("rt, addr", "sw", "shu", "sb")
+	o("rt, rs, ims", "addi", "slti")
+	o("rt, rs, imu", "andi", "ori")
+	o("rt, imu", "lui")
+	o("rs, rt, label", "bne", "beq")
+	o("label", "j")
 
 	return ret
 }()
