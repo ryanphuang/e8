@@ -38,8 +38,8 @@ type Assembler struct {
 	Out      io.Writer
 	Filename string
 
-	sections   []*Section
-	sectionMap map[string]*Section
+	sections   []*section
+	sectionMap map[string]*section
 }
 
 var _ Locator = new(Assembler)
@@ -58,11 +58,11 @@ func (self *Assembler) LocateData(s string) (uint32, bool) {
 }
 
 func (self *Assembler) Assemble() error {
-	self.sections = make([]*Section, 0, 1024)
-	self.sectionMap = make(map[string]*Section)
+	self.sections = make([]*section, 0, 1024)
+	self.sectionMap = make(map[string]*section)
 
 	scanner := bufio.NewScanner(self.In)
-	sec := NewSection("")
+	sec := newSection("")
 	lineno := 0
 	var lastError error
 	for scanner.Scan() {

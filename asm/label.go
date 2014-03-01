@@ -1,6 +1,6 @@
 package asm
 
-type Label struct {
+type label struct {
 	index int
 	name  string
 }

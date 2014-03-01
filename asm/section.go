@@ -10,27 +10,27 @@ import (
 	"github.com/h8liu/e8/asm/parse"
 )
 
-type Section struct {
+type section struct {
 	Name     string
 	Start    uint32
 	lines    []*line.Line
-	labelMap map[string]*Label
-	labels   []*Label
+	labelMap map[string]*label
+	labels   []*label
 }
 
-func NewSection(name string) *Section {
-	ret := new(Section)
+func newSection(name string) *section {
+	ret := new(section)
 	ret.Name = name
 	ret.lines = make([]*line.Line, 0, 1024)
-	ret.labelMap = make(map[string]*Label)
-	ret.labels = make([]*Label, 0, 1024)
+	ret.labelMap = make(map[string]*label)
+	ret.labels = make([]*label, 0, 1024)
 	return ret
 }
 
-func (self *Section) Nline() int   { return len(self.lines) }
-func (self *Section) Size() uint32 { return uint32(self.Nline() << 2) }
+func (self *section) Nline() int   { return len(self.lines) }
+func (self *section) Size() uint32 { return uint32(self.Nline() << 2) }
 
-func (self *Section) Line(s string, lineNo int) error {
+func (self *section) Line(s string, lineNo int) error {
 	line, e := line.Parse(s)
 	if e != nil {
 		return e
@@ -41,7 +41,7 @@ func (self *Section) Line(s string, lineNo int) error {
 	return nil
 }
 
-func (self *Section) Label(s string) error {
+func (self *section) Label(s string) error {
 	if !strings.HasSuffix(s, ":") {
 		return ef("not a label")
 	}
@@ -55,13 +55,13 @@ func (self *Section) Label(s string) error {
 		return ef("redefined label: %s", s)
 	}
 
-	label := &Label{len(self.lines), s}
+	label := &label{len(self.lines), s}
 	self.labelMap[s] = label
 	self.labels = append(self.labels, label)
 	return nil
 }
 
-func (self *Section) PrintTo(out io.Writer) error {
+func (self *section) PrintTo(out io.Writer) error {
 	labIndex := 0
 	for i, line := range self.lines {
 		for labIndex < len(self.labels) {
@@ -82,7 +82,7 @@ func (self *Section) PrintTo(out io.Writer) error {
 	return nil
 }
 
-func (self *Section) Locate(lab string) (uint32, bool) {
+func (self *section) Locate(lab string) (uint32, bool) {
 	label, found := self.labelMap[lab]
 	if !found {
 		return 0, false
@@ -98,7 +98,7 @@ func pu32(buf []byte, i uint32) {
 	buf[3] = uint8(i >> 24)
 }
 
-func (self *Section) CompileTo(out io.Writer) error {
+func (self *section) CompileTo(out io.Writer) error {
 	buf := make([]byte, 4)
 
 	for _, line := range self.lines {
@@ -112,7 +112,7 @@ func (self *Section) CompileTo(out io.Writer) error {
 	return nil
 }
 
-func (self *Section) FillLabels(locator Locator, err io.Writer) {
+func (self *section) FillLabels(locator Locator, err io.Writer) {
 	for i, line := range self.lines {
 		curPos := self.Start + uint32(i<<2) + 4
 		if line.IsJump() {
