@@ -1,4 +1,4 @@
-package e8asm
+package asm
 
 import (
 	"bufio"

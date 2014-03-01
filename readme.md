@@ -1,6 +1,6 @@
 **Road Plan**
 
-- Build a MISP-like very simple virtual machine
+- Build a MIPS-like very simple virtual machine
 - Build an assembler
 - Build a compiler for a Go-like language
 - Reimplement all the above in Javascript
@@ -30,3 +30,10 @@
 - Ideally, all the modules and interfaces could be easily reused, since they
   would likely be small, and hence easy for human to read, understand, modify
   and maintain.
+
+**TODO**
+
+- Refactor the instruction assembly parsing and formatting into a separate package.
+- Multi-section support in assembly.
+- Const immediates support in assembly.
+- Data section support in assembly.

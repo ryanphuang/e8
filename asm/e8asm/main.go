@@ -7,7 +7,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/h8liu/e8/e8asm"
+	"github.com/h8liu/e8/asm"
 	"github.com/h8liu/e8/img"
 	"github.com/h8liu/e8/vm/mem"
 )
@@ -53,7 +53,7 @@ func assemble(fname string) ([]byte, error) {
 	defer fin.Close()
 
 	asmBuf := new(bytes.Buffer)
-	asm := &e8asm.Assembler{
+	asm := &asm.Assembler{
 		In:       fin,
 		Out:      asmBuf,
 		Filename: fname,

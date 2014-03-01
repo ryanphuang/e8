@@ -7,6 +7,23 @@ func (i Inst) Op() uint8   { return uint8(i >> 26) }
 func (i Inst) Rs() uint8   { return uint8(i>>21) & 0x1f }
 func (i Inst) Rt() uint8   { return uint8(i>>16) & 0x1f }
 func (i Inst) Rd() uint8   { return uint8(i>>11) & 0x1f }
+func (i Inst) Sh() uint8   { return uint8(i>>6) & 0x1f }
+func (i Inst) Fn() uint8   { return uint8(i) & 0x3f }
+func (i Inst) Ims() int16  { return int16(uint16(i)) }
+func (i Inst) Imu() uint16 { return uint16(i) }
+func (i Inst) Ad() int32   { return int32(i) << 6 >> 6 }
+
+func (i Inst) SetIms(ims int16) Inst {
+	ret := i & 0xffff0000
+	ret |= Inst(uint16(ims))
+	return ret
+}
+
+func (i Inst) SetImu(imu uint16) Inst {
+	ret := i & 0xffff0000
+	ret |= Inst(imu)
+	return ret
+}
 
 type instFunc func(c Core, fields *fields)
 

@@ -70,8 +70,7 @@ func opSb(c Core, f *fields) {
 }
 
 func opLui(c Core, f *fields) {
-	t := c.ReadReg(f.rt)
-	c.WriteReg(f.rt, (t&0xffff)|(unsignExt(f.im)<<16))
+	c.WriteReg(f.rt, unsignExt(f.im)<<16)
 }
 
 func opAndi(c Core, f *fields) {
