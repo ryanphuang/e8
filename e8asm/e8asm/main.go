@@ -45,16 +45,11 @@ func makeImage(buf []byte, out io.Writer) error {
 	return nil
 }
 
-func main() {
-	flag.Parse()
-	args := flag.Args()
-
-	err(len(args) == 0, "no input file")
-	err(len(args) > 1, "too many input files")
-
-	fname := args[0]
-	fin, e := os.Open(args[0])
-	err(e != nil, e)
+func assemble(fname string) ([]byte, error) {
+	fin, e := os.Open(fname)
+	if e != nil {
+		return nil, e
+	}
 	defer fin.Close()
 
 	asmBuf := new(bytes.Buffer)
@@ -64,15 +59,25 @@ func main() {
 		Filename: fname,
 	}
 	e = asm.Assemble()
-	// assembler will print the errors it self
-	// so we only need to exit here
-	err(e != nil, "")
+	return asmBuf.Bytes(), e
+}
+
+func main() {
+	flag.Parse()
+	args := flag.Args()
+
+	err(len(args) == 0, "no input file")
+	err(len(args) > 1, "too many input files")
+
+	asmBuf, e := assemble(args[0])
+	err(asmBuf == nil && e != nil, e)
+	err(e != nil, "") // assemble error already reported, so just exit
 
 	imgBuf := new(bytes.Buffer)
-	e = makeImage(asmBuf.Bytes(), imgBuf)
+	e = makeImage(asmBuf, imgBuf)
 	err(e != nil, e)
 
-	core, e := img.Make(bytes.NewBuffer(imgBuf.Bytes()))
+	core, e := img.Make(imgBuf)
 	err(e != nil, e)
 
 	if *stdout == "" {
