@@ -44,9 +44,14 @@ See more on my [Motivation](https://github.com/h8liu/e8/wiki/Motivation) page.
   system functionality will be mapped to Page 0.  Future fancy hardware will be
   mapped to the following small-id pages in the address space.
 - Multi-core and ring protection (future plan): `e8` will not have protection
-  rings (e.g. kernel mode and user mode). Rather, it will use an approach
+  rings (e.g. kernel mode and user mode). Instead, it will use an approach
   similar to ARM's TrustZone, where there will be a previledged VM that can
-  manipulate other VM's execution and page tables.
+  manipulate other child VMs' execution state and page tables.
+- Interrupts (future plan): Inside a VM, there will be events, but there will
+  be no interrupt handlers. A VM can suspend itself and wake up on an interrupt
+  event, so a VM can be event driven, but code execution will not be forced to
+  suspend. A previledged VM, however, can simulate interrupt handling on its
+  child VMs, if it is desired to.
 - Language support: The project (simulator, assembler, compiler) is written in
   golang, and I plan to implement a subset of golang that compiles to `e8`, the
   assembler and the compiler will be ported to that subset language later in
