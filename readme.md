@@ -50,8 +50,8 @@ See more on my [Motivation](https://github.com/h8liu/e8/wiki/Motivation) page.
 - Interrupts (future plan): Inside a VM, there will be events, but there will
   be no interrupt handlers. A VM can suspend itself and wake up on an interrupt
   event, so a VM can be event driven, but code execution will not be forced to
-  suspend. A previledged VM, however, can simulate interrupt handling on its
-  child VMs, if it is desired to.
+  suspend and continue at another program counter. A previledged VM, however,
+  can simulate interrupt handling on its child VMs, if it is desired to.
 - Language support: The project (simulator, assembler, compiler) is written in
   golang, and I plan to implement a subset of golang that compiles to `e8`, the
   assembler and the compiler will be ported to that subset language later in
