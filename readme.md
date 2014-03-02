@@ -43,7 +43,7 @@ See more on my [Motivation](https://github.com/h8liu/e8/wiki/Motivation) page.
   so there is no need for special instructions like `in` and `out`. Basic
   system functionality will be mapped to Page 0.  Future fancy hardware will be
   mapped to the following small-id pages in the address space.
-- Multi-core and ring protection (coming soon): `e8` will not have protection
+- Multi-core and ring protection (future plan): `e8` will not have protection
   rings (e.g. kernel mode and user mode). Rather, it will use an approach
   similar to ARM's TrustZone, where there will be a previledged VM that can
   manipulate other VM's execution and page tables.
