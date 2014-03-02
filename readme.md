@@ -2,8 +2,10 @@
 
 - Build a MIPS-like very simple virtual machine
 - Build an assembler
-- Build a compiler for a Go-like language
-- Reimplement all the above in Javascript
+- Build a compiler for a Go-like language `e8go`
+- Port the assembler and compiler to `e8go`.
+- Reimplement the VM in Javascript.
+- Write a small OS in `e8go`, so that is runs in the browser.
 - Build an online platform where people can submit interfaces, test cases, and
   implementations
 - Test cases works like executables (`package main`, but maybe `package test`
