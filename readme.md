@@ -50,7 +50,7 @@ See more on my [Motivation](https://github.com/h8liu/e8/wiki/Motivation) page.
 - Language support: The project (simulator, assembler, compiler) is written in
   golang, and I plan to implement a subset of golang that compiles to `e8`, the
   assembler and the compiler will be ported to that subset language later in
-  the future, so there will be a advanced language compiler that runs in `e8`
+  the future, and there will be an advanced language compiler that runs in `e8`
   where it can compile itself.
 
 **TODO**
