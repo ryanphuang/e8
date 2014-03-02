@@ -31,6 +31,28 @@
   would likely be small, and hence easy for human to read, understand, modify
   and maintain.
 
+See more on my [Motivation](https://github.com/h8liu/e8/wiki/Motivation) page.
+
+**Design**
+
+- [RISC](https://github.com/h8liu/e8/wiki/RISC-Specification): the MIPS-like
+  simple instructions set.  It only has less than 40 instructions, which means
+  `e8` CPU will be very easy to port. In fact, I have already ported the core to 
+  Javascript: [`e8js`](https://github.com/h8liu/e8js).
+- System Page (wiki page coming soon): all IOs in `e8` will be memory mapped,
+  so there is no need for special instructions like `in` and `out`. Basic
+  system functionality will be mapped to Page 0.  Future hardwares will be
+  mapped to the following small pages in the address space.
+- Multi-core and ring protection (coming soon): `e8` will not have protection
+  rings. Rather, it will use an approach similar to ARM's TrustZone, where
+  there will be a previledged VM that can manipulate other VM's execution and
+  page tables.
+- Language support: The project (simulator, assembler, compiler) is written in
+  golang, and I plan to implement a subset of golang that compiles to `e8`, the
+  assembler and the compiler will be ported to that subset language later in
+  the future, so there will be a advanced language compiler that runs in `e8`
+  where it can compile itself.
+
 **TODO**
 
 - Const immediates support in assembly.
