@@ -44,9 +44,9 @@ See more on my [Motivation](https://github.com/h8liu/e8/wiki/Motivation) page.
   system functionality will be mapped to Page 0.  Future hardwares will be
   mapped to the following small pages in the address space.
 - Multi-core and ring protection (coming soon): `e8` will not have protection
-  rings. Rather, it will use an approach similar to ARM's TrustZone, where
-  there will be a previledged VM that can manipulate other VM's execution and
-  page tables.
+  rings (e.g. kernel mode and user mode). Rather, it will use an approach
+  similar to ARM's TrustZone, where there will be a previledged VM that can
+  manipulate other VM's execution and page tables.
 - Language support: The project (simulator, assembler, compiler) is written in
   golang, and I plan to implement a subset of golang that compiles to `e8`, the
   assembler and the compiler will be ported to that subset language later in
