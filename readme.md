@@ -35,10 +35,10 @@ See more on my [Motivation](https://github.com/h8liu/e8/wiki/Motivation) page.
 
 **Design**
 
-- [RISC](https://github.com/h8liu/e8/wiki/RISC-Specification): the MIPS-like
-  simple instructions set.  It only has less than 40 instructions, which means
-  `e8` CPU will be very easy to port. In fact, I have already ported the core to 
-  Javascript: [`e8js`](https://github.com/h8liu/e8js).
+- [RISC](https://github.com/h8liu/e8/wiki/RISC-Specification): The MIPS-like
+  simple instructions set that `e8` uses only has less than 40 instructions,
+  which means `e8` CPU will be very easy to port. In fact, I have already
+  ported the core to Javascript: [`e8js`](https://github.com/h8liu/e8js).
 - System Page (wiki page coming soon): all IOs in `e8` will be memory mapped,
   so there is no need for special instructions like `in` and `out`. Basic
   system functionality will be mapped to Page 0.  Future hardwares will be
