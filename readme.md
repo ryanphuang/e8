@@ -41,7 +41,7 @@ See more on my [Motivation](https://github.com/h8liu/e8/wiki/Motivation) page.
   ported the core to Javascript: [`e8js`](https://github.com/h8liu/e8js).
 - System Page (wiki page coming soon): all IOs in `e8` will be memory mapped,
   so there is no need for special instructions like `in` and `out`. Basic
-  system functionality will be mapped to Page 0.  Future hardwares will be
+  system functionality will be mapped to Page 0.  Future fancy hardware will be
   mapped to the following small pages in the address space.
 - Multi-core and ring protection (coming soon): `e8` will not have protection
   rings (e.g. kernel mode and user mode). Rather, it will use an approach
