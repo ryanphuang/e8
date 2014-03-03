@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/h8liu/e8.png?branch=master)](https://travis-ci.org/h8liu/e8)
+
 **Road Plan**
 
 - Build a MIPS-like very simple virtual machine
