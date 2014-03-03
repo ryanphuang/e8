@@ -60,7 +60,8 @@ See more on my [Motivation](https://github.com/h8liu/e8/wiki/Motivation) page.
   golang, and I plan to implement a subset of golang that compiles to `e8`, the
   assembler and the compiler will be ported to that subset language later in
   the future, and there will be an advanced language compiler that runs in `e8`
-  where it can compile itself.
+  where it can compile itself. 
+  [More thoughts here](https://github.com/h8liu/e8/wiki/Thoughts-on-Language).
 
 **TODO**
 
